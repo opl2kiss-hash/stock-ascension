@@ -60,15 +60,15 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
   <div style="margin-bottom:40px;">
     <div class="label-pill">即時掃描結果</div>
     <h1>台股技術型態<br><span>選股清單</span></h1>
-    <div class="scan-meta">掃描時間：2026-03-27 16:22 &nbsp;｜&nbsp; 符合個股：16 支</div>
+    <div class="scan-meta">掃描時間：2026-03-29 11:17 &nbsp;｜&nbsp; 符合個股：11 支</div>
   </div>
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">16</div><div class="stat-sub">本次掃描結果</div></div>
-    <div class="stat-card"><div class="stat-label">最高量比</div><div class="stat-value gold">5.83x</div><div class="stat-sub">1528 恩德</div></div>
-    <div class="stat-card"><div class="stat-label">突破型態</div><div class="stat-value">5</div><div class="stat-sub">放量突破 / 旗形</div></div>
-    <div class="stat-card"><div class="stat-label">反轉型態</div><div class="stat-value">13</div><div class="stat-sub">W底 / 頭肩底</div></div>
+    <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">11</div><div class="stat-sub">本次掃描結果</div></div>
+    <div class="stat-card"><div class="stat-label">最高量比</div><div class="stat-value gold">4.48x</div><div class="stat-sub">4971 —</div></div>
+    <div class="stat-card"><div class="stat-label">突破型態</div><div class="stat-value">2</div><div class="stat-sub">放量突破 / 旗形</div></div>
+    <div class="stat-card"><div class="stat-label">反轉型態</div><div class="stat-value">10</div><div class="stat-sub">W底 / 頭肩底</div></div>
   </div>
-  <div class="toolbar"><button class="filter-btn active" onclick="filterPattern('all',this)">全部 (16)</button><button class="filter-btn" onclick="filterPattern('頭肩底突破頸線',this)">頭肩底突破頸線 (9)</button><button class="filter-btn" onclick="filterPattern('底部放量突破',this)">底部放量突破 (5)</button><button class="filter-btn" onclick="filterPattern('W底突破頸線',this)">W底突破頸線 (4)</button>
+  <div class="toolbar"><button class="filter-btn active" onclick="filterPattern('all',this)">全部 (11)</button><button class="filter-btn" onclick="filterPattern('頭肩底突破頸線',this)">頭肩底突破頸線 (8)</button><button class="filter-btn" onclick="filterPattern('W底突破頸線',this)">W底突破頸線 (2)</button><button class="filter-btn" onclick="filterPattern('底部放量突破',this)">底部放量突破 (2)</button>
     <input class="search-box" type="text" placeholder="搜尋代號 / 股名..." oninput="searchTable(this.value)">
   </div>
   <div class="table-wrap"><table id="main-table">
@@ -79,134 +79,94 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
       <th onclick="sortTable(6)">掃描日期</th><th>備註</th>
     </tr></thead>
     <tbody id="table-body"><tr data-pattern="W底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6962</span><span class="stock-name">奕力-KY</span></div></td>
+          <td><div class="stock-cell"><span class="stock-id">4147</span><span class="stock-name">—</span></div></td>
           <td><div class="tag-wrap"><span class="tag tag-w">W底突破頸線</span></div></td>
-          <td><span class="price-cell">34.4</span></td>
-          <td><span class="vol-ratio high">3.38x</span></td>
-          <td><span class="neckline">31.8</span></td>
-          <td><span class="vol-avg">2871</span></td>
+          <td><span class="price-cell">54.5</span></td>
+          <td><span class="vol-ratio mid">1.86x</span></td>
+          <td><span class="neckline">52.4</span></td>
+          <td><span class="vol-avg">1335</span></td>
           <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">雙底29.7/30.5，頸線31.8，差距2.7%</td></tr><tr data-pattern="W底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">9933</span><span class="stock-name">中鼎</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-w">W底突破頸線</span></div></td>
-          <td><span class="price-cell">36.15</span></td>
-          <td><span class="vol-ratio mid">1.57x</span></td>
-          <td><span class="neckline">31.6</span></td>
-          <td><span class="vol-avg">8269</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">雙底30.5/29.8，頸線31.6，差距2.5%</td></tr><tr data-pattern="W底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6672</span><span class="stock-name">騰輝電子-KY</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-w">W底突破頸線</span></div></td>
-          <td><span class="price-cell">131.5</span></td>
-          <td><span class="vol-ratio mid">1.55x</span></td>
-          <td><span class="neckline">102.0</span></td>
-          <td><span class="vol-avg">4772</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">雙底94.6/89.6，頸線102.0，差距5.3%</td></tr><tr data-pattern="底部放量突破">
-          <td><div class="stock-cell"><span class="stock-id">1723</span><span class="stock-name">中碳</span></div></td>
+          <td class="note-cell">雙底50.3/48.1，頸線52.4，差距4.3%</td></tr><tr data-pattern="底部放量突破">
+          <td><div class="stock-cell"><span class="stock-id">3293</span><span class="stock-name">—</span></div></td>
           <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
-          <td><span class="price-cell">80.7</span></td>
-          <td><span class="vol-ratio high">4.67x</span></td>
-          <td><span class="neckline">78.7</span></td>
-          <td><span class="vol-avg">1020</span></td>
+          <td><span class="price-cell">796.0</span></td>
+          <td><span class="vol-ratio mid">1.56x</span></td>
+          <td><span class="neckline">794.0</span></td>
+          <td><span class="vol-avg">1983</span></td>
           <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">突破前25日高點 78.7，量比 4.67x</td></tr><tr data-pattern="底部放量突破">
-          <td><div class="stock-cell"><span class="stock-id">1582</span><span class="stock-name">信錦</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
-          <td><span class="price-cell">102.0</span></td>
-          <td><span class="vol-ratio high">3.13x</span></td>
-          <td><span class="neckline">101.0</span></td>
-          <td><span class="vol-avg">8496</span></td>
+          <td class="note-cell">突破前25日高點 794.0，量比 1.56x</td></tr><tr data-pattern="底部放量突破 / W底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">4971</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell">578.0</span></td>
+          <td><span class="vol-ratio high">4.48x</span></td>
+          <td><span class="neckline">564.0</span></td>
+          <td><span class="vol-avg">2158</span></td>
           <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">突破前25日高點 101.0，量比 3.13x</td></tr><tr data-pattern="底部放量突破">
-          <td><div class="stock-cell"><span class="stock-id">5871</span><span class="stock-name">中租-KY</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
-          <td><span class="price-cell">113.0</span></td>
-          <td><span class="vol-ratio mid">2.37x</span></td>
-          <td><span class="neckline">110.0</span></td>
-          <td><span class="vol-avg">6769</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">突破前25日高點 110.0，量比 2.37x</td></tr><tr data-pattern="底部放量突破">
-          <td><div class="stock-cell"><span class="stock-id">4958</span><span class="stock-name">臻鼎-KY</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
-          <td><span class="price-cell">230.0</span></td>
-          <td><span class="vol-ratio mid">2.17x</span></td>
-          <td><span class="neckline">225.0</span></td>
-          <td><span class="vol-avg">25486</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">突破前25日高點 225.0，量比 2.17x</td></tr><tr data-pattern="底部放量突破 / W底突破頸線 / 頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">1528</span><span class="stock-name">恩德</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-w">W底突破頸線</span><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">25.45</span></td>
-          <td><span class="vol-ratio high">5.83x</span></td>
-          <td><span class="neckline">25.3</span></td>
-          <td><span class="vol-avg">5579</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">突破前25日高點 25.3，量比 5.83x | 雙底21.1/21.2，頸線23.8，差距0.7% | 頭21.1，左肩21.9，右肩21.2，頸線21.5</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6285</span><span class="stock-name">啟碁</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">188.5</span></td>
-          <td><span class="vol-ratio mid">2.27x</span></td>
-          <td><span class="neckline">169.0</span></td>
-          <td><span class="vol-avg">20699</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭152.0，左肩172.0，右肩166.0，頸線169.0</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6257</span><span class="stock-name">矽格</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">146.0</span></td>
-          <td><span class="vol-ratio low">1.48x</span></td>
-          <td><span class="neckline">123.0</span></td>
-          <td><span class="vol-avg">10633</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭118.0，左肩120.5，右肩125.5，頸線123.0</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6438</span><span class="stock-name">迅得</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">177.5</span></td>
-          <td><span class="vol-ratio low">0.98x</span></td>
-          <td><span class="neckline">145.5</span></td>
-          <td><span class="vol-avg">3835</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭141.0，左肩144.0，右肩147.0，頸線145.5</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">2402</span><span class="stock-name">毅嘉</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">53.0</span></td>
-          <td><span class="vol-ratio low">0.83x</span></td>
-          <td><span class="neckline">50.2</span></td>
-          <td><span class="vol-avg">9106</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭47.2，左肩50.8，右肩49.6，頸線50.2</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">6282</span><span class="stock-name">康舒</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">48.9</span></td>
-          <td><span class="vol-ratio low">0.77x</span></td>
-          <td><span class="neckline">45.98</span></td>
-          <td><span class="vol-avg">22317</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭43.1，左肩46.9，右肩45.1，頸線46.0</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">2379</span><span class="stock-name">瑞昱</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">494.5</span></td>
-          <td><span class="vol-ratio low">0.76x</span></td>
-          <td><span class="neckline">466.25</span></td>
-          <td><span class="vol-avg">3886</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭445.0，左肩463.0，右肩469.5，頸線466.2</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">2049</span><span class="stock-name">上銀</span></div></td>
-          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
-          <td><span class="price-cell">235.0</span></td>
-          <td><span class="vol-ratio low">0.6x</span></td>
-          <td><span class="neckline">223.0</span></td>
-          <td><span class="vol-avg">5819</span></td>
-          <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭220.0，左肩225.0，右肩221.0，頸線223.0</td></tr><tr data-pattern="頭肩底突破頸線">
-          <td><div class="stock-cell"><span class="stock-id">8271</span><span class="stock-name">宇瞻</span></div></td>
+          <td class="note-cell">突破前25日高點 564.0，量比 4.48x | 雙底424.5/435.5，頸線476.5，差距2.6%</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">3265</span><span class="stock-name">—</span></div></td>
           <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
           <td><span class="price-cell">144.5</span></td>
-          <td><span class="vol-ratio low">0.29x</span></td>
-          <td><span class="neckline">109.5</span></td>
-          <td><span class="vol-avg">7018</span></td>
+          <td><span class="vol-ratio low">1.17x</span></td>
+          <td><span class="neckline">136.25</span></td>
+          <td><span class="vol-avg">1991</span></td>
           <td><span class="date-cell">2026-03-27</span></td>
-          <td class="note-cell">頭102.5，左肩112.0，右肩107.0，頸線109.5</td></tr></tbody>
+          <td class="note-cell">頭124.5，左肩140.0，右肩132.5，頸線136.2</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">3264</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">158.0</span></td>
+          <td><span class="vol-ratio low">0.74x</span></td>
+          <td><span class="neckline">144.0</span></td>
+          <td><span class="vol-avg">8234</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭133.0，左肩143.0，右肩145.0，頸線144.0</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">4303</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">56.0</span></td>
+          <td><span class="vol-ratio low">0.7x</span></td>
+          <td><span class="neckline">54.75</span></td>
+          <td><span class="vol-avg">1226</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭50.6，左肩55.1，右肩54.4，頸線54.8</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">6173</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">61.7</span></td>
+          <td><span class="vol-ratio low">0.38x</span></td>
+          <td><span class="neckline">60.6</span></td>
+          <td><span class="vol-avg">2464</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭59.0，左肩60.8，右肩60.4，頸線60.6</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">3357</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">153.0</span></td>
+          <td><span class="vol-ratio low">0.36x</span></td>
+          <td><span class="neckline">148.0</span></td>
+          <td><span class="vol-avg">4045</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭144.0，左肩146.0，右肩150.0，頸線148.0</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">3709</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">67.7</span></td>
+          <td><span class="vol-ratio low">0.3x</span></td>
+          <td><span class="neckline">66.35</span></td>
+          <td><span class="vol-avg">5486</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭65.7，左肩66.5，右肩66.2，頸線66.3</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">4130</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">31.95</span></td>
+          <td><span class="vol-ratio low">0.25x</span></td>
+          <td><span class="neckline">30.08</span></td>
+          <td><span class="vol-avg">2039</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭0.0，左肩29.8，右肩30.4，頸線30.1</td></tr><tr data-pattern="頭肩底突破頸線">
+          <td><div class="stock-cell"><span class="stock-id">6175</span><span class="stock-name">—</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell">45.35</span></td>
+          <td><span class="vol-ratio low">0.23x</span></td>
+          <td><span class="neckline">44.68</span></td>
+          <td><span class="vol-avg">1918</span></td>
+          <td><span class="date-cell">2026-03-27</span></td>
+          <td class="note-cell">頭41.6，左肩44.7，右肩44.6，頸線44.7</td></tr></tbody>
   </table></div>
   <div class="disclaimer"><strong>免責聲明：</strong>本清單由程式依技術型態自動篩選，<strong>僅供技術分析參考，不構成任何投資建議。</strong>量比 = 今日成交量 ÷ 近20日均量。</div>
 </div>
