@@ -85,15 +85,15 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
   <div style="margin-bottom:40px;">
     <div class="label-pill">即時掃描結果</div>
     <h1>台股技術型態<br><span>選股清單</span></h1>
-    <div class="scan-meta">掃描時間：{scan_time} &nbsp;｜&nbsp; 符合個股：{total} 支</div>
+    <div class="scan-meta">掃描時間：2026-03-30 11:30 &nbsp;｜&nbsp; 符合個股：14 支</div>
   </div>
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">{total}</div><div class="stat-sub">本次掃描結果</div></div>
-    <div class="stat-card"><div class="stat-label">最高量比</div><div class="stat-value gold">{max_vr}</div><div class="stat-sub">{max_sid}</div></div>
-    <div class="stat-card"><div class="stat-label">突破型態</div><div class="stat-value">{breakout_n}</div><div class="stat-sub">放量突破 / 旗形</div></div>
-    <div class="stat-card"><div class="stat-label">反轉型態</div><div class="stat-value">{reversal_n}</div><div class="stat-sub">W底 / 頭肩底</div></div>
+    <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">14</div><div class="stat-sub">本次掃描結果</div></div>
+    <div class="stat-card"><div class="stat-label">最高量比</div><div class="stat-value gold">4.48x</div><div class="stat-sub">4971 IET-KY</div></div>
+    <div class="stat-card"><div class="stat-label">突破型態</div><div class="stat-value">3</div><div class="stat-sub">放量突破 / 旗形</div></div>
+    <div class="stat-card"><div class="stat-label">反轉型態</div><div class="stat-value">13</div><div class="stat-sub">W底 / 頭肩底</div></div>
   </div>
-  <div class="toolbar">{filter_btns}
+  <div class="toolbar"><button class="filter-btn active" onclick="filterPattern('all',this)">全部 (14)</button><button class="filter-btn" onclick="filterPattern('頭肩底突破頸線',this)">頭肩底突破頸線 (9)</button><button class="filter-btn" onclick="filterPattern('W底突破頸線',this)">W底突破頸線 (4)</button><button class="filter-btn" onclick="filterPattern('底部放量突破',this)">底部放量突破 (3)</button>
     <input class="search-box" type="text" placeholder="搜尋代號 / 股名..." oninput="searchTable(this.value)">
   </div>
   <div class="table-wrap"><table id="main-table">
