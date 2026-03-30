@@ -85,7 +85,7 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
   <div style="margin-bottom:40px;">
     <div class="label-pill">即時掃描結果</div>
     <h1>台股技術型態<br><span>選股清單</span></h1>
-    <div class="scan-meta">掃描時間：2026-03-30 11:46 &nbsp;｜&nbsp; 符合個股：14 支</div>
+    <div class="scan-meta">掃描時間：2026-03-30 12:06 &nbsp;｜&nbsp; 符合個股：14 支</div>
   </div>
   <div class="stats-row">
     <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">14</div><div class="stat-sub">本次掃描結果</div></div>
@@ -267,69 +267,6 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 
 var FM_TOKEN='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNi0wMy0yNiAxMTozMToyNSIsInVzZXJfaWQiOiJub3lhbmdib3QiLCJlbWFpbCI6Im9wbDJraXNzQHlhaG9vLmNvbSIsImlwIjoiMTAxLjguMjQ3LjIxNyJ9.Dkp8LMCglumUH2uTqcDAwMaQysSgy8sQW3ydzC2-z1I';
 var _ck=null,_cv=null;
-function showChart(sid,name){
-  document.getElementById('m-id').textContent=sid;
-  document.getElementById('m-nm').textContent=name;
-  document.getElementById('m-load').style.display='block';
-  document.getElementById('m-load').textContent='載入K線資料中...';
-  document.getElementById('m-charts').style.display='none';
-  document.getElementById('m-info').style.display='none';
-  document.getElementById('mo').classList.add('open');
-  var sd=new Date(); sd.setDate(sd.getDate()-100);
-  var sdStr=sd.toISOString().split('T')[0];
-  var url='https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id='+sid+'&start_date='+sdStr+'&token='+FM_TOKEN;
-  fetch(url).then(function(r){return r.json();}).then(function(j){
-    var raw=(j.data||[]).slice(-60);
-    if(!raw.length){document.getElementById('m-load').textContent='暫無K線資料';return;}
-    var lb=raw.map(function(d){return d.date.slice(5);});
-    var op=raw.map(function(d){return +d.open;}),hi=raw.map(function(d){return +d.max;});
-    var lo=raw.map(function(d){return +d.min;}),cl=raw.map(function(d){return +d.close;});
-    var vl=raw.map(function(d){return +(+d.Trading_Volume/1000).toFixed(0);});
-    var last=raw[raw.length-1],prev=raw[raw.length-2];
-    var chg=+last.close-+prev.close,pct=(chg/+prev.close*100).toFixed(2);
-    var up=chg>=0;
-    document.getElementById('m-info').style.display='flex';
-    document.getElementById('m-info').innerHTML=
-      '<div class="m-ic"><div class="m-il">收盤</div><div class="m-iv '+(up?'up':'dn')+'">'+last.close+'</div></div>'+
-      '<div class="m-ic"><div class="m-il">漲跌</div><div class="m-iv '+(up?'up':'dn')+'">'+(up?'+':'')+chg.toFixed(2)+'('+(up?'+':'')+pct+'%)</div></div>'+
-      '<div class="m-ic"><div class="m-il">最高</div><div class="m-iv">'+last.max+'</div></div>'+
-      '<div class="m-ic"><div class="m-il">最低</div><div class="m-iv">'+last.min+'</div></div>'+
-      '<div class="m-ic"><div class="m-il">量(張)</div><div class="m-iv">'+( +last.Trading_Volume/1000).toFixed(0)+'</div></div>'+
-      '<a class="m-wg" href="https://www.wantgoo.com/stock/'+sid+'/technical-chart" target="_blank">玩股網完整圖表 &#x2192;</a>';
-    document.getElementById('m-load').style.display='none';
-    document.getElementById('m-charts').style.display='block';
-    if(_ck){_ck.destroy();_ck=null;} if(_cv){_cv.destroy();_cv=null;}
-    var cs=cl.map(function(c,i){return c>=op[i]?'#ef4444':'#10b981';});
-    _ck=new Chart(document.getElementById('m-ck'),{
-      type:'bar',
-      data:{labels:lb,datasets:[
-        {data:cl.map(function(c,i){return[Math.min(op[i],c),Math.max(op[i],c)];}),backgroundColor:cs,borderColor:cs,borderWidth:1,borderSkipped:false},
-        {data:hi.map(function(h,i){return[lo[i],h];}),backgroundColor:'transparent',borderColor:cs,borderWidth:1,borderSkipped:false,barThickness:1}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{
-          title:function(items){return raw[items[0].dataIndex].date;},
-          label:function(item){var i=item.dataIndex;return['開:'+op[i]+' 收:'+cl[i],'高:'+hi[i]+' 低:'+lo[i]];}
-        }}},
-        scales:{
-          x:{ticks:{color:'#64748b',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{color:'rgba(30,45,69,0.5)'}},
-          y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.5)'}}
-        }
-      }
-    });
-    _cv=new Chart(document.getElementById('m-cv'),{
-      type:'bar',data:{labels:lb,datasets:[{data:vl,backgroundColor:cs,borderRadius:2}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{
-          x:{ticks:{color:'#64748b',font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false}},
-          y:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(30,45,69,0.3)'}}
-        }
-      }
-    });
-  }).catch(function(e){document.getElementById('m-load').textContent='載入失敗: '+e.message;});
-}
-function closeMo(){document.getElementById('mo').classList.remove('open');}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMo();});
 
 const FM_TOKEN="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNi0wMy0yNiAxMTozMToyNSIsInVzZXJfaWQiOiJub3lhbmdib3QiLCJlbWFpbCI6Im9wbDJraXNzQHlhaG9vLmNvbSIsImlwIjoiMTAxLjguMjQ3LjIxNyJ9.Dkp8LMCglumUH2uTqcDAwMaQysSgy8sQW3ydzC2-z1I";
 let _ck=null,_cv=null;
