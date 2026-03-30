@@ -85,7 +85,7 @@ td{padding:14px 16px;font-size:13px;vertical-align:middle;}
   <div style="margin-bottom:40px;">
     <div class="label-pill">即時掃描結果</div>
     <h1>台股技術型態<br><span>選股清單</span></h1>
-    <div class="scan-meta">掃描時間：2026-03-30 11:36 &nbsp;｜&nbsp; 符合個股：14 支</div>
+    <div class="scan-meta">掃描時間：2026-03-30 11:46 &nbsp;｜&nbsp; 符合個股：14 支</div>
   </div>
   <div class="stats-row">
     <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">14</div><div class="stat-sub">本次掃描結果</div></div>
@@ -396,9 +396,9 @@ async function showChart(sid,name){
 }
 function closeMo(){document.getElementById('mo').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMo();});
-function filterPattern(p,btn){{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{{const s=r.dataset.pattern||'';const show=p==='all'||s.includes(p);r.style.display=show?'':'none';if(show)n++;}});document.getElementById('total-count').textContent=n;}}
-function searchTable(q){{q=q.toLowerCase();let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{{const show=r.textContent.toLowerCase().includes(q);r.style.display=show?'':'none';if(show)n++;}});document.getElementById('total-count').textContent=n;}}
-let sd={{}};function sortTable(i){{const tb=document.getElementById('table-body');const rows=Array.from(tb.querySelectorAll('tr'));const d=sd[i]==='asc'?'desc':'asc';sd={{}};sd[i]=d;document.querySelectorAll('thead th').forEach((t,j)=>{{t.classList.remove('sort-asc','sort-desc');if(j===i)t.classList.add(d==='asc'?'sort-asc':'sort-desc');}});rows.sort((a,b)=>{{const at=a.querySelectorAll('td')[i]?.textContent.trim()||'';const bt=b.querySelectorAll('td')[i]?.textContent.trim()||'';const an=parseFloat(at.replace(/[^0-9.-]/g,''));const bn=parseFloat(bt.replace(/[^0-9.-]/g,''));if(!isNaN(an)&&!isNaN(bn))return d==='asc'?an-bn:bn-an;return d==='asc'?at.localeCompare(bt,'zh-TW'):bt.localeCompare(at,'zh-TW');}});rows.forEach(r=>tb.appendChild(r));}}
+function filterPattern(p,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{const s=r.dataset.pattern||'';const show=p==='all'||s.includes(p);r.style.display=show?'':'none';if(show)n++;});document.getElementById('total-count').textContent=n;}
+function searchTable(q){q=q.toLowerCase();let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{const show=r.textContent.toLowerCase().includes(q);r.style.display=show?'':'none';if(show)n++;});document.getElementById('total-count').textContent=n;}
+let sd={};function sortTable(i){const tb=document.getElementById('table-body');const rows=Array.from(tb.querySelectorAll('tr'));const d=sd[i]==='asc'?'desc':'asc';sd={};sd[i]=d;document.querySelectorAll('thead th').forEach((t,j)=>{t.classList.remove('sort-asc','sort-desc');if(j===i)t.classList.add(d==='asc'?'sort-asc':'sort-desc');});rows.sort((a,b)=>{const at=a.querySelectorAll('td')[i]?.textContent.trim()||'';const bt=b.querySelectorAll('td')[i]?.textContent.trim()||'';const an=parseFloat(at.replace(/[^0-9.-]/g,''));const bn=parseFloat(bt.replace(/[^0-9.-]/g,''));if(!isNaN(an)&&!isNaN(bn))return d==='asc'?an-bn:bn-an;return d==='asc'?at.localeCompare(bt,'zh-TW'):bt.localeCompare(at,'zh-TW');});rows.forEach(r=>tb.appendChild(r));}
 </script>
 
 <div class="mo" id="mo" onclick="if(event.target===this)closeMo()">
