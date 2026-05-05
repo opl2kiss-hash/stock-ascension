@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台股選股清單</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;--accent:#3b82f6;--accent2:#06b6d4;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#64748b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+.container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:40px 24px 80px;}
+.label-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:100px;padding:4px 14px;font-size:11px;font-weight:500;color:var(--accent2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;}
+.label-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
+h1{font-size:clamp(24px,4vw,38px);font-weight:700;color:#fff;letter-spacing:-0.02em;line-height:1.15;}
+h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.scan-meta{margin-top:10px;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:32px 0;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity 0.2s;}
+.stat-card:hover{border-color:rgba(59,130,246,0.4);}.stat-card:hover::after{opacity:1;}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;color:#fff;line-height:1;}
+.stat-value.green{color:var(--green);}.stat-value.gold{color:var(--gold);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'Noto Sans TC',sans-serif;font-weight:500;}
+.filter-btn:hover,.filter-btn.active{background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.5);color:var(--accent2);}
+.search-box{margin-left:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;color:var(--text);font-family:'Noto Sans TC',sans-serif;width:180px;outline:none;}
+.search-box:focus{border-color:rgba(59,130,246,0.5);}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);padding:12px 16px;font-size:11px;font-weight:500;color:var(--muted);text-align:left;letter-spacing:0.07em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--text);}
+thead th.sort-asc::after{content:' ↑';color:var(--accent);}thead th.sort-desc::after{content:' ↓';color:var(--accent);}
+tbody tr{border-bottom:1px solid rgba(30,45,69,0.6);transition:background 0.15s;animation:fadeIn 0.4s ease both;}
+tbody tr:last-child{border-bottom:none;}tbody tr:hover{background:rgba(59,130,246,0.05);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+td{padding:14px 16px;font-size:13px;vertical-align:middle;}
+.stock-cell{display:flex;flex-direction:column;gap:3px;}
+.stock-id{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:#fff;}
+.stock-name{font-size:12px;color:var(--muted);}
+.tag-wrap{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{display:inline-block;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:500;white-space:nowrap;}
+.tag-breakout{background:rgba(29,78,216,0.25);color:#93c5fd;border:1px solid rgba(59,130,246,0.3);}
+.tag-flag{background:rgba(6,95,70,0.25);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);}
+.tag-w{background:rgba(120,53,15,0.3);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);}
+.tag-hs{background:rgba(124,45,18,0.3);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+.price-cell{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:#fff;}
+.vol-ratio{font-family:'DM Mono',monospace;font-weight:500;}
+.vol-ratio.high{color:var(--red);}.vol-ratio.mid{color:var(--gold);}.vol-ratio.low{color:var(--green);}
+.neckline{font-family:'DM Mono',monospace;color:var(--accent2);font-size:13px;}
+.vol-avg{font-family:'DM Mono',monospace;color:var(--muted);font-size:13px;}
+.action-btns{display:flex;gap:5px;}
+.btn-chart{background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.4);color:#93c5fd;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
+.btn-chart:hover{background:rgba(59,130,246,0.4);}
+.btn-wantgoo{background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;border-radius:6px;padding:4px 10px;font-size:11px;text-decoration:none;white-space:nowrap;}
+.btn-wantgoo:hover{background:rgba(16,185,129,0.3);}
+.note-cell{font-size:12px;color:var(--muted);max-width:260px;line-height:1.6;}
+.date-cell{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.disclaimer{margin-top:28px;padding:14px 18px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7;}
+.disclaimer strong{color:#fca5a5;}
+@media(max-width:768px){td,th{padding:10px 10px;}.note-cell{display:none;}.search-box{width:130px;}}
+
+
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.mo.open{display:flex;}
+.md{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(900px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);}
+.m-id{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:#fff;}
+.m-nm{font-size:13px;color:var(--muted);margin-top:2px;}
+.m-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:5px;}
+.m-body{padding:16px 22px 22px;overflow-y:auto;flex:1;}
+.m-load{text-align:center;padding:50px;color:var(--muted);font-size:14px;}
+.m-info{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.m-ic{background:var(--bg);border-radius:8px;padding:8px 14px;}
+.m-il{font-size:9px;color:var(--muted);text-transform:uppercase;}
+.m-iv{font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:#fff;margin-top:2px;}
+.m-iv.up{color:#ef4444;}.m-iv.dn{color:#10b981;}
+.m-wg{display:inline-flex;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;border-radius:7px;padding:7px 14px;font-size:12px;text-decoration:none;font-weight:500;align-self:center;}
+.m-wg:hover{background:rgba(16,185,129,0.3);}
+.m-cw{position:relative;height:280px;margin-bottom:8px;}
+.m-vw{position:relative;height:88px;}
+</style></head><body>
+<div class="container">
+  <div style="margin-bottom:40px;">
+    <div class="label-pill">即時掃描結果</div>
+    <h1>台股技術型態<br><span>選股清單</span></h1>
+    <div class="scan-meta">掃描時間：2026-05-05 16:43 &nbsp;｜&nbsp; 符合個股：27 支</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">符合個股</div><div class="stat-value green" id="total-count">27</div><div class="stat-sub">本次掃描結果</div></div>
+    <div class="stat-card"><div class="stat-label">最高量比</div><div class="stat-value gold">5.92x</div><div class="stat-sub">6405 悅城</div></div>
+    <div class="stat-card"><div class="stat-label">突破型態</div><div class="stat-value">15</div><div class="stat-sub">放量突破 / 旗形</div></div>
+    <div class="stat-card"><div class="stat-label">反轉型態</div><div class="stat-value">18</div><div class="stat-sub">W底 / 頭肩底</div></div>
+  </div>
+  <div class="toolbar"><button class="filter-btn active" onclick="filterPattern('all',this)">全部 (27)</button><button class="filter-btn" onclick="filterPattern('底部放量突破',this)">底部放量突破 (14)</button><button class="filter-btn" onclick="filterPattern('頭肩底突破頸線',this)">頭肩底突破頸線 (12)</button><button class="filter-btn" onclick="filterPattern('W底突破頸線',this)">W底突破頸線 (6)</button><button class="filter-btn" onclick="filterPattern('旗形整理突破',this)">旗形整理突破 (1)</button>
+    <input class="search-box" type="text" placeholder="搜尋代號 / 股名..." oninput="searchTable(this.value)">
+  </div>
+  <div class="table-wrap"><table id="main-table">
+    <thead><tr>
+      <th onclick="sortTable(0)">股票</th><th onclick="sortTable(1)">型態</th>
+      <th onclick="sortTable(2)">收盤價</th><th onclick="sortTable(3)">量比</th>
+      <th onclick="sortTable(4)">突破關鍵價</th><th onclick="sortTable(5)">日均量(張)</th>
+      <th onclick="sortTable(6)">掃描日期</th><th>備註</th>
+      <th>操作</th>
+    </tr></thead>
+    <tbody id="table-body"><tr data-pattern="W底突破頸線" data-sid="2359">
+          <td><div class="stock-cell"><span class="stock-id">2359</span><span class="stock-name">所羅門</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#10b981">124.5</span><span style="color:#10b981;font-size:11px;margin-left:4px">▼0.80%</span></td>
+          <td><span class="vol-ratio mid">2.01x</span></td>
+          <td><span class="neckline">122.0</span></td>
+          <td><span class="vol-avg">1905</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">雙底110.5/109.0，頸線122.0，差距1.4%</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2359/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="W底突破頸線" data-sid="6257">
+          <td><div class="stock-cell"><span class="stock-id">6257</span><span class="stock-name">矽格</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">197.0</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲3.41%</span></td>
+          <td><span class="vol-ratio low">1.39x</span></td>
+          <td><span class="neckline">187.0</span></td>
+          <td><span class="vol-avg">17375</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">雙底177.5/177.5，頸線187.0，差距0.0%</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6257/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="6405">
+          <td><div class="stock-cell"><span class="stock-id">6405</span><span class="stock-name">悅城</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">61.4</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.84%</span></td>
+          <td><span class="vol-ratio high">5.92x</span></td>
+          <td><span class="neckline">55.9</span></td>
+          <td><span class="vol-avg">2112</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 55.9，量比 5.92x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6405/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="4526">
+          <td><div class="stock-cell"><span class="stock-id">4526</span><span class="stock-name">東台</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">40.3</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲7.47%</span></td>
+          <td><span class="vol-ratio high">4.05x</span></td>
+          <td><span class="neckline">39.5</span></td>
+          <td><span class="vol-avg">6798</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 39.5，量比 4.05x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/4526/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="4562">
+          <td><div class="stock-cell"><span class="stock-id">4562</span><span class="stock-name">穎漢</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">40.35</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.95%</span></td>
+          <td><span class="vol-ratio high">3.65x</span></td>
+          <td><span class="neckline">38.7</span></td>
+          <td><span class="vol-avg">1242</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 38.7，量比 3.65x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/4562/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="2342">
+          <td><div class="stock-cell"><span class="stock-id">2342</span><span class="stock-name">茂矽</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">39.7</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.97%</span></td>
+          <td><span class="vol-ratio high">2.81x</span></td>
+          <td><span class="neckline">36.6</span></td>
+          <td><span class="vol-avg">2499</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 36.6，量比 2.81x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2342/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="3550">
+          <td><div class="stock-cell"><span class="stock-id">3550</span><span class="stock-name">聯穎</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">23.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.81%</span></td>
+          <td><span class="vol-ratio high">2.57x</span></td>
+          <td><span class="neckline">22.7</span></td>
+          <td><span class="vol-avg">3748</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 22.7，量比 2.57x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/3550/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="6197">
+          <td><div class="stock-cell"><span class="stock-id">6197</span><span class="stock-name">佳必琪</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">243.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲6.56%</span></td>
+          <td><span class="vol-ratio mid">2.4x</span></td>
+          <td><span class="neckline">228.5</span></td>
+          <td><span class="vol-avg">5261</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 228.5，量比 2.40x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6197/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="2317">
+          <td><div class="stock-cell"><span class="stock-id">2317</span><span class="stock-name">鴻海</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">239.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲5.27%</span></td>
+          <td><span class="vol-ratio mid">2.31x</span></td>
+          <td><span class="neckline">234.0</span></td>
+          <td><span class="vol-avg">69475</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 234.0，量比 2.31x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2317/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="3532">
+          <td><div class="stock-cell"><span class="stock-id">3532</span><span class="stock-name">台勝科</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">228.0</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.88%</span></td>
+          <td><span class="vol-ratio mid">2.23x</span></td>
+          <td><span class="neckline">207.5</span></td>
+          <td><span class="vol-avg">3552</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 207.5，量比 2.23x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/3532/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="3443">
+          <td><div class="stock-cell"><span class="stock-id">3443</span><span class="stock-name">創意</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">4835.0</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲3.20%</span></td>
+          <td><span class="vol-ratio mid">2.05x</span></td>
+          <td><span class="neckline">4685.0</span></td>
+          <td><span class="vol-avg">2039</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 4685.0，量比 2.05x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/3443/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破" data-sid="3605">
+          <td><div class="stock-cell"><span class="stock-id">3605</span><span class="stock-name">宏致</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">91.2</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲6.29%</span></td>
+          <td><span class="vol-ratio mid">1.99x</span></td>
+          <td><span class="neckline">90.7</span></td>
+          <td><span class="vol-avg">8757</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 90.7，量比 1.99x</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/3605/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破 / W底突破頸線" data-sid="3535">
+          <td><div class="stock-cell"><span class="stock-id">3535</span><span class="stock-name">晶彩科</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">145.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲3.19%</span></td>
+          <td><span class="vol-ratio high">3.64x</span></td>
+          <td><span class="neckline">141.0</span></td>
+          <td><span class="vol-avg">8051</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 141.0，量比 3.64x | 雙底115.0/114.0，頸線134.0，差距0.9%</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/3535/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破 / W底突破頸線" data-sid="6005">
+          <td><div class="stock-cell"><span class="stock-id">6005</span><span class="stock-name">群益證</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">29.7</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲2.41%</span></td>
+          <td><span class="vol-ratio mid">1.65x</span></td>
+          <td><span class="neckline">29.3</span></td>
+          <td><span class="vol-avg">14562</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 29.3，量比 1.65x | 雙底27.6/27.9，頸線28.2，差距1.3%</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6005/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破 / W底突破頸線 / 頭肩底突破頸線" data-sid="2354">
+          <td><div class="stock-cell"><span class="stock-id">2354</span><span class="stock-name">鴻準</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-w">W底突破頸線</span><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">58.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲9.96%</span></td>
+          <td><span class="vol-ratio high">5.47x</span></td>
+          <td><span class="neckline">54.5</span></td>
+          <td><span class="vol-avg">6635</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 54.5，量比 5.47x | 雙底50.0/50.9，頸線54.2，差距1.8% | 頭50.0，左肩52.2，右肩50.9，頸線51.5</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2354/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="底部放量突破 / 頭肩底突破頸線" data-sid="8926">
+          <td><div class="stock-cell"><span class="stock-id">8926</span><span class="stock-name">台汽電</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-breakout">底部放量突破</span><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">47.55</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲3.59%</span></td>
+          <td><span class="vol-ratio high">3.26x</span></td>
+          <td><span class="neckline">46.85</span></td>
+          <td><span class="vol-avg">1508</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">突破前25日高點 46.9，量比 3.26x | 頭43.0，左肩45.0，右肩44.4，頸線44.7</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/8926/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="旗形整理突破 / W底突破頸線" data-sid="2369">
+          <td><div class="stock-cell"><span class="stock-id">2369</span><span class="stock-name">菱生</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-flag">旗形整理突破</span><span class="tag tag-w">W底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">33.2</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲6.58%</span></td>
+          <td><span class="vol-ratio mid">2.25x</span></td>
+          <td><span class="neckline">32.9</span></td>
+          <td><span class="vol-avg">15080</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">旗杆漲8.1%，整理8根後突破 | 雙底28.1/29.1，頸線32.7，差距3.2%</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2369/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="1514">
+          <td><div class="stock-cell"><span class="stock-id">1514</span><span class="stock-name">亞力</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#10b981">120.0</span><span style="color:#10b981;font-size:11px;margin-left:4px">▼0.83%</span></td>
+          <td><span class="vol-ratio high">5.28x</span></td>
+          <td><span class="neckline">110.5</span></td>
+          <td><span class="vol-avg">2492</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭100.0，左肩111.0，右肩110.0，頸線110.5</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/1514/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="1536">
+          <td><div class="stock-cell"><span class="stock-id">1536</span><span class="stock-name">和大</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">56.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲2.73%</span></td>
+          <td><span class="vol-ratio high">2.62x</span></td>
+          <td><span class="neckline">50.03</span></td>
+          <td><span class="vol-avg">1937</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭47.2，左肩50.7，右肩49.4，頸線50.0</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/1536/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="2338">
+          <td><div class="stock-cell"><span class="stock-id">2338</span><span class="stock-name">光罩</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">50.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲5.76%</span></td>
+          <td><span class="vol-ratio low">1.21x</span></td>
+          <td><span class="neckline">45.2</span></td>
+          <td><span class="vol-avg">6474</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭43.2，左肩46.0，右肩44.4，頸線45.2</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2338/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="1503">
+          <td><div class="stock-cell"><span class="stock-id">1503</span><span class="stock-name">士電</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#10b981">198.0</span><span style="color:#10b981;font-size:11px;margin-left:4px">▼1.74%</span></td>
+          <td><span class="vol-ratio low">1.11x</span></td>
+          <td><span class="neckline">194.25</span></td>
+          <td><span class="vol-avg">1846</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭178.5，左肩200.0，右肩188.5，頸線194.2</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/1503/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="6770">
+          <td><div class="stock-cell"><span class="stock-id">6770</span><span class="stock-name">力積電</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">55.4</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲4.33%</span></td>
+          <td><span class="vol-ratio low">0.91x</span></td>
+          <td><span class="neckline">52.5</span></td>
+          <td><span class="vol-avg">117167</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭51.4，左肩53.1，右肩51.9，頸線52.5</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6770/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="2352">
+          <td><div class="stock-cell"><span class="stock-id">2352</span><span class="stock-name">佳世達</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">24.95</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲2.25%</span></td>
+          <td><span class="vol-ratio low">0.91x</span></td>
+          <td><span class="neckline">23.45</span></td>
+          <td><span class="vol-avg">4596</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭22.8，左肩23.0，右肩23.9，頸線23.4</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2352/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="6202">
+          <td><div class="stock-cell"><span class="stock-id">6202</span><span class="stock-name">盛群</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">57.2</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲3.06%</span></td>
+          <td><span class="vol-ratio low">0.75x</span></td>
+          <td><span class="neckline">52.75</span></td>
+          <td><span class="vol-avg">4946</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭45.3，左肩51.8，右肩53.7，頸線52.8</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/6202/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="2357">
+          <td><div class="stock-cell"><span class="stock-id">2357</span><span class="stock-name">華碩</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#10b981">590.0</span><span style="color:#10b981;font-size:11px;margin-left:4px">▼0.17%</span></td>
+          <td><span class="vol-ratio low">0.67x</span></td>
+          <td><span class="neckline">572.0</span></td>
+          <td><span class="vol-avg">3802</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭549.0，左肩563.0，右肩581.0，頸線572.0</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/2357/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="5388">
+          <td><div class="stock-cell"><span class="stock-id">5388</span><span class="stock-name">中磊</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">79.2</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲1.93%</span></td>
+          <td><span class="vol-ratio low">0.47x</span></td>
+          <td><span class="neckline">76.2</span></td>
+          <td><span class="vol-avg">5826</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭75.0，左肩75.9，右肩76.5，頸線76.2</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/5388/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr><tr data-pattern="頭肩底突破頸線" data-sid="5222">
+          <td><div class="stock-cell"><span class="stock-id">5222</span><span class="stock-name">全訊</span></div></td>
+          <td><div class="tag-wrap"><span class="tag tag-hs">頭肩底突破頸線</span></div></td>
+          <td><span class="price-cell" style="color:#ef4444">137.5</span><span style="color:#ef4444;font-size:11px;margin-left:4px">▲1.48%</span></td>
+          <td><span class="vol-ratio low">0.25x</span></td>
+          <td><span class="neckline">131.75</span></td>
+          <td><span class="vol-avg">1466</span></td>
+          <td><span class="date-cell">2026-05-05</span></td>
+          <td class="note-cell">頭112.0，左肩132.0，右肩131.5，頸線131.8</td>
+          <td><div class="action-btns">
+            <a class="btn-wantgoo" href="https://www.wantgoo.com/stock/5222/technical-chart" target="_blank">玩股網</a>
+          </div></td></tr></tbody>
+  </table></div>
+  <div class="disclaimer"><strong>免責聲明：</strong>本清單由程式依技術型態自動篩選，<strong>僅供技術分析參考，不構成任何投資建議。</strong>量比 = 今日成交量 ÷ 近20日均量。</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+
+
+const FM_TOKEN="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNi0wMy0yNiAxMTozMToyNSIsInVzZXJfaWQiOiJub3lhbmdib3QiLCJlbWFpbCI6Im9wbDJraXNzQHlhaG9vLmNvbSIsImlwIjoiMTAxLjguMjQ3LjIxNyJ9.Dkp8LMCglumUH2uTqcDAwMaQysSgy8sQW3ydzC2-z1I";
+let _ck=null,_cv=null;
+async function showChart(sid,name){
+  document.getElementById('m-id').textContent=sid;
+  document.getElementById('m-nm').textContent=name;
+  document.getElementById('m-load').style.display='block';
+  document.getElementById('m-load').textContent='載入K線資料中…';
+  document.getElementById('m-charts').style.display='none';
+  document.getElementById('m-info').style.display='none';
+  document.getElementById('mo').classList.add('open');
+  try{
+    const sd=new Date(); sd.setDate(sd.getDate()-100);
+    const url=`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${sid}&start_date=${sd.toISOString().split('T')[0]}&token=${FM_TOKEN}`;
+    const j=await(await fetch(url)).json();
+    const raw=(j.data||[]).slice(-60);
+    if(!raw.length){document.getElementById('m-load').textContent='暫無K線資料';return;}
+    const lb=raw.map(d=>d.date.slice(5));
+    const op=raw.map(d=>+d.open),hi=raw.map(d=>+d.max);
+    const lo=raw.map(d=>+d.min),cl=raw.map(d=>+d.close);
+    const vl=raw.map(d=>+(+d.Trading_Volume/1000).toFixed(0));
+    const last=raw[raw.length-1],prev=raw[raw.length-2];
+    const chg=+last.close-+prev.close,pct=(chg/+prev.close*100).toFixed(2);
+    const up=chg>=0;
+    document.getElementById('m-info').style.display='flex';
+    document.getElementById('m-info').innerHTML=`
+      <div class="m-ic"><div class="m-il">收盤</div><div class="m-iv ${up?'up':'dn'}">${last.close}</div></div>
+      <div class="m-ic"><div class="m-il">漲跌</div><div class="m-iv ${up?'up':'dn'}">${up?'+':''}${chg.toFixed(2)}(${up?'+':''}${pct}%)</div></div>
+      <div class="m-ic"><div class="m-il">最高</div><div class="m-iv">${last.max}</div></div>
+      <div class="m-ic"><div class="m-il">最低</div><div class="m-iv">${last.min}</div></div>
+      <div class="m-ic"><div class="m-il">量(張)</div><div class="m-iv">${(+last.Trading_Volume/1000).toFixed(0)}</div></div>
+      <a class="m-wg" href="https://www.wantgoo.com/stock/${sid}/technical-chart" target="_blank">玩股網完整圖表 →</a>
+    `;
+    document.getElementById('m-load').style.display='none';
+    document.getElementById('m-charts').style.display='block';
+    if(_ck){_ck.destroy();_ck=null;} if(_cv){_cv.destroy();_cv=null;}
+    const cs=cl.map((c,i)=>c>=op[i]?'#ef4444':'#10b981');
+    _ck=new Chart(document.getElementById('m-ck'),{
+      type:'bar',data:{labels:lb,datasets:[
+        {data:cl.map((c,i)=>[Math.min(op[i],c),Math.max(op[i],c)]),backgroundColor:cs,borderColor:cs,borderWidth:1,borderSkipped:false},
+        {data:hi.map((h,i)=>[lo[i],h]),backgroundColor:'transparent',borderColor:cs,borderWidth:1,borderSkipped:false,barThickness:1}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{
+          title:items=>raw[items[0].dataIndex].date,
+          label:item=>{const i=item.dataIndex;return[`開:${op[i]} 收:${cl[i]}`,`高:${hi[i]} 低:${lo[i]}`];}
+        }}},
+        scales:{
+          x:{ticks:{color:'#64748b',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{color:'rgba(30,45,69,0.5)'}},
+          y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,45,69,0.5)'}}
+        }
+      }
+    });
+    _cv=new Chart(document.getElementById('m-cv'),{
+      type:'bar',data:{labels:lb,datasets:[{data:vl,backgroundColor:cs,borderRadius:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#64748b',font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false}},
+          y:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(30,45,69,0.3)'}}
+        }
+      }
+    });
+  }catch(e){document.getElementById('m-load').textContent='載入失敗: '+e.message;}
+}
+function closeMo(){document.getElementById('mo').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMo();});
+function filterPattern(p,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{const s=r.dataset.pattern||'';const show=p==='all'||s.includes(p);r.style.display=show?'':'none';if(show)n++;});document.getElementById('total-count').textContent=n;}
+function searchTable(q){q=q.toLowerCase();let n=0;document.querySelectorAll('#table-body tr').forEach(r=>{const show=r.textContent.toLowerCase().includes(q);r.style.display=show?'':'none';if(show)n++;});document.getElementById('total-count').textContent=n;}
+let sd={};function sortTable(i){const tb=document.getElementById('table-body');const rows=Array.from(tb.querySelectorAll('tr'));const d=sd[i]==='asc'?'desc':'asc';sd={};sd[i]=d;document.querySelectorAll('thead th').forEach((t,j)=>{t.classList.remove('sort-asc','sort-desc');if(j===i)t.classList.add(d==='asc'?'sort-asc':'sort-desc');});rows.sort((a,b)=>{const at=a.querySelectorAll('td')[i]?.textContent.trim()||'';const bt=b.querySelectorAll('td')[i]?.textContent.trim()||'';const an=parseFloat(at.replace(/[^0-9.-]/g,''));const bn=parseFloat(bt.replace(/[^0-9.-]/g,''));if(!isNaN(an)&&!isNaN(bn))return d==='asc'?an-bn:bn-an;return d==='asc'?at.localeCompare(bt,'zh-TW'):bt.localeCompare(at,'zh-TW');});rows.forEach(r=>tb.appendChild(r));}
+</script>
+
+<div class="mo" id="mo" onclick="if(event.target===this)closeMo()">
+  <div class="md">
+    <div class="mh">
+      <div><div class="m-id" id="m-id"></div><div class="m-nm" id="m-nm"></div></div>
+      <button class="m-close" onclick="closeMo()">&#x2715;</button>
+    </div>
+    <div class="m-body">
+      <div id="m-info" class="m-info" style="display:none"></div>
+      <div id="m-load" class="m-load">載入K線資料中&#8230;</div>
+      <div id="m-charts" style="display:none">
+        <div class="m-cw"><canvas id="m-ck"></canvas></div>
+        <div class="m-vw"><canvas id="m-cv"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>
