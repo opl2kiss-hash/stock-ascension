@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台股昇天 盤中監控 2026/09/01</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08101a;--bg2:#0d1520;--bg3:#111d2e;
+  --border:#1a2840;--border2:#22344f;
+  --text:#d4e0ef;--muted:#50657f;
+  --accent:#3b82f6;--up:#f43f5e;--dn:#22c55e;--warn:#f59e0b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:13px;}
+.top{position:sticky;top:0;z-index:200;background:var(--bg2);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;gap:10px;padding:7px 14px;flex-wrap:wrap;
+  box-shadow:0 2px 20px rgba(0,0,0,.6);}
+.brand{font-size:15px;font-weight:900;color:var(--accent);white-space:nowrap;}
+.brand small{color:var(--muted);font-size:10px;font-weight:400;margin-left:4px;}
+.ctrls{display:flex;gap:5px;align-items:center;margin-left:auto;flex-wrap:wrap;}
+.btn{background:var(--bg3);color:var(--text);border:1px solid var(--border);
+  padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit;transition:all .12s;}
+.btn:hover{background:var(--border);}
+.btn.go{background:#15803d;border-color:#15803d;color:#fff;}
+.btn.stop{background:#b91c1c;border-color:#b91c1c;color:#fff;}
+select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border);
+  padding:4px 7px;border-radius:5px;font-size:11px;font-family:inherit;}
+.clock{color:var(--muted);font-size:11px;white-space:nowrap;}
+.sum-bar{display:flex;gap:7px;padding:6px 14px;background:var(--bg2);
+  border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:4px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-size:12px;}
+.chip .lbl{color:var(--muted);font-size:11px;}
+.chip .v{font-weight:700;font-size:13px;}
+.v.up{color:var(--up);}.v.dn{color:var(--dn);}.v.warn{color:var(--warn);}.v.blue{color:var(--accent);}
+.info-bar{padding:5px 14px;background:var(--bg);border-bottom:1px solid var(--border);
+  font-size:11px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.mon-wrap{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 125px);}
+.mon-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:980px;}
+.mon-tbl th{position:sticky;top:0;z-index:10;background:#060d18;
+  border-bottom:2px solid var(--border2);padding:7px 8px;
+  color:var(--muted);font-weight:600;font-size:11px;
+  cursor:pointer;user-select:none;white-space:nowrap;text-align:right;}
+.mon-tbl th.lft{text-align:left;}
+.mon-tbl th:hover{color:var(--accent);}
+.mon-tbl td{padding:7px 8px;border-bottom:1px solid var(--border);
+  white-space:nowrap;text-align:right;transition:background .15s;}
+.mon-tbl td.lft{text-align:left;}
+.mon-tbl tr:hover td{background:rgba(59,130,246,.06);}
+@keyframes fu{0%,100%{background:transparent}50%{background:rgba(244,63,94,.22)}}
+@keyframes fd{0%,100%{background:transparent}50%{background:rgba(34,197,94,.22)}}
+.fl-u td{animation:fu .6s ease;}.fl-d td{animation:fd .6s ease;}
+.stock-link{color:var(--accent);text-decoration:none;font-size:12px;font-weight:500;}
+.stock-link:hover{text-decoration:underline;color:#60a5fa;}
+.sid-txt{font-family:'DM Mono',monospace;font-weight:700;font-size:13px;color:#fff;}
+.ind-txt{font-size:10px;color:var(--muted);margin-top:1px;}
+.fresh-txt{font-size:10px;color:var(--dn);margin-left:3px;}
+.stale-txt{font-size:10px;color:var(--warn);margin-left:3px;}
+.up{color:var(--up);}.dn{color:var(--dn);}.flat{color:var(--muted);}
+.neck-v{font-family:'DM Mono',monospace;color:#06b6d4;font-size:12px;font-weight:600;}
+.mkt-tse{background:#1e40af;color:#bfdbfe;padding:1px 5px;border-radius:3px;font-size:10px;}
+.mkt-otc{background:#6d28d9;color:#ddd6fe;padding:1px 5px;border-radius:3px;font-size:10px;}
+.ba{background:#166534;color:#86efac;padding:1px 7px;border-radius:3px;font-weight:700;font-size:11px;}
+.bb{background:#1e3a8a;color:#93c5fd;padding:1px 7px;border-radius:3px;font-weight:700;font-size:11px;}
+.bc{background:#78350f;color:#fcd34d;padding:1px 6px;border-radius:3px;font-weight:700;font-size:11px;}
+.tag{display:inline-block;border-radius:5px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;margin:1px;}
+.tag-b{background:rgba(29,78,216,.25);color:#93c5fd;border:1px solid rgba(59,130,246,.3);}
+.tag-f{background:rgba(6,95,70,.25);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
+.tag-w{background:rgba(120,53,15,.3);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+.tag-h{background:rgba(124,45,18,.3);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+.hd{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:middle;}
+.h1{background:#3b82f6;}.h2{background:#f59e0b;}.h3{background:#ef4444;}.h4{background:#f43f5e;box-shadow:0 0 6px #f43f5e88;}
+.toast{position:fixed;bottom:18px;right:18px;z-index:999;background:#166534;color:#fff;
+  padding:8px 16px;border-radius:8px;font-size:12px;opacity:0;
+  transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+.disc{padding:5px 14px;border-top:1px solid rgba(239,68,68,.12);
+  font-size:10px;color:var(--muted);position:sticky;bottom:0;background:var(--bg);}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">📊 台股昇天 盤中監控<small>v2.0 ｜ 2026/09/01 ｜ 選股日 2026-08-28</small></div>
+  <div class="ctrls">
+    <select class="sel" id="intSel" onchange="setInt(+this.value)">
+      <option value="10" selected>10秒</option>
+      <option value="20">20秒</option>
+      <option value="30">30秒</option>
+      <option value="60">60秒</option>
+    </select>
+    <button class="btn" onclick="refreshAll()">🔁 立即更新</button>
+    <span class="clock" id="lastUpd">—</span>
+    <span class="clock" id="sysClock">—</span>
+  </div>
+</div>
+
+<div class="sum-bar">
+  <div class="chip"><span class="lbl">監控</span><span class="v blue" id="st-cnt">33</span></div>
+  <div class="chip"><span class="lbl">盤中A</span><span class="v up"   id="st-a">0</span></div>
+  <div class="chip"><span class="lbl">盤中B</span><span class="v warn" id="st-b">0</span></div>
+  <div class="chip"><span class="lbl">上漲</span><span class="v up"   id="st-up">0</span></div>
+  <div class="chip"><span class="lbl">下跌</span><span class="v dn"   id="st-dn">0</span></div>
+  <div class="chip"><span class="lbl">爆量(≥2x)</span><span class="v warn" id="st-vl">0</span></div>
+  <div class="chip"><span class="lbl">站VWAP</span><span class="v up"   id="st-vw">0</span></div>
+  <div class="chip"><span class="lbl">平均漲幅</span><span class="v" id="st-avg">—</span></div>
+</div>
+
+<div class="info-bar">
+  <span>📋 選股結果來自 V1 stock-ascension.py ｜ 共 33 支</span>
+  <span>頭肩底突破頸線:25　W底突破頸線:5　底部放量突破:5</span>
+  <span style="color:#f43f5e;margin-left:auto">⚠️ 僅供技術分析參考，不構成投資建議</span>
+</div>
+
+<div class="mon-wrap">
+<table class="mon-tbl">
+  <thead><tr>
+    <th class="lft" data-k="id">代號</th>
+    <th class="lft" data-k="name">名稱（點→玩股網）</th>
+    <th data-k="market">市場</th>
+    <th data-k="neckline">頸線價</th>
+    <th data-k="price">現價</th>
+    <th data-k="chgPct">漲跌%</th>
+    <th data-k="volK">量(張)</th>
+    <th data-k="vr">量比</th>
+    <th data-k="vwapGap">距VWAP</th>
+    <th data-k="dayHighGap">距日高</th>
+    <th data-k="ma17" style="color:#a78bfa">MA17</th>
+    <th data-k="ma17Gap" style="color:#a78bfa">距MA17%</th>
+    <th data-k="score">盤中分</th>
+    <th data-k="grade">盤中評</th>
+    <th>熱度</th>
+    <th>訊號</th>
+    <th data-k="pattern">型態</th>
+  </tr></thead>
+  <tbody id="mon-tbody">
+    <tr><td colspan="15" style="text-align:center;padding:40px;color:var(--muted);">
+      正在啟動即時監控…
+    </td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="disc">⚠️ 即時報價來自 TWSE MIS，延遲約 5~15 秒。本頁以 file:// 開啟，可直接存取 TWSE MIS。</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 選股資料 ────────────────────────────────
+const WATCHLIST = [
+  {id:"9941",name:"裕融",market:"未知",pattern:"W底突破頸線",vr:2.42,neckline:"86.1",screenPrice:86.6,avgVol:1135,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"1503",name:"士電",market:"未知",pattern:"W底突破頸線",vr:2.41,neckline:"203.5",screenPrice:205.5,avgVol:1433,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"2392",name:"正崴",market:"未知",pattern:"W底突破頸線",vr:1.44,neckline:"36.1",screenPrice:44.5,avgVol:5041,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"5607",name:"遠雄港",market:"未知",pattern:"W底突破頸線",vr:1.3,neckline:"50.3",screenPrice:51.5,avgVol:1058,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"8021",name:"尖點",market:"未知",pattern:"底部放量突破",vr:3.42,neckline:"452.0",screenPrice:454.0,avgVol:4716,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6141",name:"柏承",market:"未知",pattern:"底部放量突破",vr:2.32,neckline:"55.4",screenPrice:58.2,avgVol:3222,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"7788",name:"松川精密",market:"未知",pattern:"底部放量突破",vr:2.05,neckline:"300.0",screenPrice:327.5,avgVol:1755,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"2033",name:"佳大",market:"未知",pattern:"底部放量突破 / W底突破頸線",vr:2.46,neckline:"24.25",screenPrice:25.65,avgVol:1498,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"1563",name:"巧新",market:"未知",pattern:"底部放量突破 / 頭肩底突破頸線",vr:2.23,neckline:"65.9",screenPrice:66.0,avgVol:1442,industry:"",scanDate:"2026-08-26",ma17:0.0},
+  {id:"1514",name:"亞力",market:"未知",pattern:"頭肩底突破頸線",vr:4.85,neckline:"101.0",screenPrice:105.0,avgVol:1249,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6456",name:"GIS-KY",market:"未知",pattern:"頭肩底突破頸線",vr:2.86,neckline:"63.35",screenPrice:74.3,avgVol:3734,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"4956",name:"光鋐",market:"未知",pattern:"頭肩底突破頸線",vr:2.34,neckline:"28.75",screenPrice:36.95,avgVol:2442,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"1717",name:"長興",market:"未知",pattern:"頭肩底突破頸線",vr:2.11,neckline:"69.55",screenPrice:77.7,avgVol:13828,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6209",name:"今國光",market:"未知",pattern:"頭肩底突破頸線",vr:1.95,neckline:"66.2",screenPrice:76.7,avgVol:6152,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"8103",name:"瀚荃",market:"未知",pattern:"頭肩底突破頸線",vr:1.59,neckline:"77.7",screenPrice:108.5,avgVol:3255,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6239",name:"力成",market:"未知",pattern:"頭肩底突破頸線",vr:1.52,neckline:"264.5",screenPrice:287.0,avgVol:16978,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"8222",name:"寶一",market:"未知",pattern:"頭肩底突破頸線",vr:1.43,neckline:"37.88",screenPrice:38.9,avgVol:1138,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6168",name:"宏齊",market:"未知",pattern:"頭肩底突破頸線",vr:1.4,neckline:"23.9",screenPrice:28.85,avgVol:3320,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"5471",name:"松翰",market:"未知",pattern:"頭肩底突破頸線",vr:1.4,neckline:"54.65",screenPrice:61.7,avgVol:3357,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6451",name:"訊芯-KY",market:"未知",pattern:"頭肩底突破頸線",vr:1.26,neckline:"397.75",screenPrice:453.5,avgVol:4393,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"9933",name:"中鼎",market:"未知",pattern:"頭肩底突破頸線",vr:1.17,neckline:"40.17",screenPrice:40.6,avgVol:2494,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6525",name:"捷敏-KY",market:"未知",pattern:"頭肩底突破頸線",vr:1.1,neckline:"139.5",screenPrice:144.5,avgVol:2131,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"5469",name:"瀚宇博",market:"未知",pattern:"頭肩底突破頸線",vr:0.99,neckline:"69.3",screenPrice:74.8,avgVol:1766,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"1609",name:"大亞",market:"未知",pattern:"頭肩底突破頸線",vr:0.95,neckline:"36.58",screenPrice:38.1,avgVol:3837,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6139",name:"亞翔",market:"未知",pattern:"頭肩底突破頸線",vr:0.9,neckline:"766.5",screenPrice:775.0,avgVol:2862,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"4960",name:"誠美材",market:"未知",pattern:"頭肩底突破頸線",vr:0.82,neckline:"20.5",screenPrice:21.85,avgVol:2927,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"8422",name:"可寧衛*",market:"未知",pattern:"頭肩底突破頸線",vr:0.78,neckline:"26.1",screenPrice:27.1,avgVol:5582,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"4976",name:"佳凌",market:"未知",pattern:"頭肩底突破頸線",vr:0.76,neckline:"35.85",screenPrice:39.15,avgVol:4594,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"1536",name:"和大",market:"未知",pattern:"頭肩底突破頸線",vr:0.76,neckline:"49.2",screenPrice:50.3,avgVol:1386,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6472",name:"保瑞",market:"未知",pattern:"頭肩底突破頸線",vr:0.69,neckline:"408.25",screenPrice:435.0,avgVol:1223,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"2034",name:"允強",market:"未知",pattern:"頭肩底突破頸線",vr:0.67,neckline:"19.82",screenPrice:20.45,avgVol:1416,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"8150",name:"南茂",market:"未知",pattern:"頭肩底突破頸線",vr:0.61,neckline:"88.6",screenPrice:90.5,avgVol:36557,industry:"",scanDate:"2026-08-28",ma17:0.0},
+  {id:"6215",name:"和椿",market:"未知",pattern:"頭肩底突破頸線",vr:0.45,neckline:"95.45",screenPrice:98.4,avgVol:1258,industry:"",scanDate:"2026-08-28",ma17:0.0}
+];
+const FM_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNi0wMy0yNiAxMTozMToyNSIsInVzZXJfaWQiOiJub3lhbmdib3QiLCJlbWFpbCI6Im9wbDJraXNzQHlhaG9vLmNvbSIsImlwIjoiMTAxLjguMjQ3LjIxNyJ9.Dkp8LMCglumUH2uTqcDAwMaQysSgy8sQW3ydzC2-z1I";
+
+// ── 狀態 ────────────────────────────────────
+let watchlist  = WATCHLIST.map(s => ({...s}));
+let lastData   = {};
+let lastSucc   = {};
+let histCache  = {};
+let histFailed = new Set();
+let autoTimer  = null;
+let refreshing = false;
+let REFRESH_SEC = 10;
+let sortKey    = 'score';
+let sortAsc    = false;
+
+setInterval(() => {
+  document.getElementById('sysClock').textContent =
+    new Date().toLocaleTimeString('zh-TW');
+}, 1000);
+
+// ── 工具 ────────────────────────────────────
+function normMkt(m) {
+  if (!m || m === '未知') return 'tse';
+  return (m==='上櫃'||m==='otc'||m==='tpex') ? 'otc' : 'tse';
+}
+
+function displayMkt(m) {
+  if (!m || m === '未知') return 'unk';
+  return normMkt(m);
+}
+
+function patTag(p) {
+  const t = p.includes('旗形') ? 'tag-f'
+           : p.includes('W底') ? 'tag-w'
+           : p.includes('頭肩') ? 'tag-h'
+           : 'tag-b';
+  return `<span class="tag ${t}">${p}</span>`;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show';
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ══ CORS 多重備援（完整複製自 V6.1）═════════
+const CORS_PROXIES = [
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(url),
+  url => 'https://cors.eu.org/' + url,
+];
+
+function isLocalApp() {
+  return ['127.0.0.1', 'localhost', '::1'].includes(location.hostname);
+}
+
+async function fetchLocalMisBatch(stocks) {
+  if (!isLocalApp()) return null;
+  const payload = stocks.map(s => `${s.id}:${normMkt(s.market)}`).join(',');
+  const url = `/api/quotes?stocks=${encodeURIComponent(payload)}&_=${Date.now()}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('本機報價服務失敗 ' + r.status);
+  const j = await r.json();
+  if (!j || !j.msgArray) throw new Error(j && j.error ? j.error : '本機報價無資料');
+  return j;
+}
+
+// fetch with 5s timeout，失敗自動換下一個 proxy
+async function fetchJsonWithProxy(url) {
+  async function ft(u, ms=5000) {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const r = await fetch(u, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (r.ok) return await r.json();
+      return null;
+    } catch(e) { clearTimeout(tid); return null; }
+  }
+  const direct = await ft(url);
+  if (direct) return direct;
+  for (const px of CORS_PROXIES) {
+    const res = await ft(px(url));
+    if (res) return res;
+  }
+  throw new Error('所有來源都失敗');
+}
+
+async function fetchMisBatch(stocks) {
+  if (!stocks || stocks.length === 0) return {};
+  const CHUNK = 50;
+  const result = {};
+  try {
+    const local = await fetchLocalMisBatch(stocks);
+    if (local && local.msgArray) {
+      local.msgArray.forEach(q => { if (q && q.c) result[q.c] = q; });
+      if (Object.keys(result).length) return result;
+    }
+  } catch(e) { console.warn('local quote api:', e.message); }
+  for (let i = 0; i < stocks.length; i += CHUNK) {
+    const sl   = stocks.slice(i, i + CHUNK);
+    const exCh = sl.map(s => normMkt(s.market) + '_' + s.id + '.tw').join('|');
+    const url  = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch='
+               + exCh + '&json=1&delay=0&_=' + Date.now();
+    try {
+      const j = await fetchJsonWithProxy(url);
+      if (j && j.msgArray) j.msgArray.forEach(q => { if (q && q.c) result[q.c] = q; });
+    } catch(e) { console.warn('MIS batch:', e.message); }
+  }
+  return result;
+}
+
+// ── 歷史資料：20日均量 + MA17 基礎值 ──────────
+async function fetchHist(id) {
+  try {
+    if (isLocalApp()) {
+      const r = await fetch(`/api/history?id=${encodeURIComponent(id)}&_=${Date.now()}`, { cache: 'no-store' });
+      if (r.ok) {
+        const local = await r.json();
+        if (local && local.ok) return local;
+      }
+    }
+    const sd  = new Date(); sd.setDate(sd.getDate() - 40);
+    const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice` +
+                `&data_id=${id}&start_date=${sd.toISOString().slice(0,10)}&token=${FM_TOKEN}`;
+    const j = await fetchJsonWithProxy(url);
+    if (!j) return null;
+    if (!j.data || j.data.length < 5) return null;
+    const rows = j.data.slice(-20);
+    const avg  = rows.reduce((a, r) => a + (r.Trading_Volume||0), 0) / rows.length / 1000;
+    const closes = j.data.map(r => Number(r.close)).filter(v => Number.isFinite(v) && v > 0);
+    const ma17Base = closes.length >= 16 ? closes.slice(-16).reduce((a, v) => a + v, 0) : null;
+    return { avgVol20: avg, ma17Base, ma17Count: ma17Base ? 16 : 0 };
+  } catch(e) { return null; }
+}
+
+// ── 盤中評分 ────────────────────────────────
+function scoreIntra(chgPct, vr, vwapGap, dayHighGap) {
+  let score = 0; const sigs = [];
+  if (chgPct >= 2 && chgPct <= 7) { score += 3; sigs.push('漲' + chgPct.toFixed(1) + '%'); }
+  else if (chgPct > 7)             { score += 1; sigs.push('⚠️過熱'); }
+  else if (chgPct >= 1)              score += 1;
+  if (vr != null) {
+    if (vr >= 2)        { score += 3; sigs.push('爆量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1.5) { score += 2; sigs.push('放量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1)     score += 1;
+  }
+  if (vwapGap != null) {
+    if (vwapGap >= 0) { score += 2; sigs.push('站VWAP'); } else score -= 1;
+  }
+  if (dayHighGap != null) {
+    if (dayHighGap >= -0.5)  { score += 2; sigs.push('貼日高'); }
+    else if (dayHighGap >= -1.5) score += 1;
+  }
+  const grade = score >= 8 ? 'A' : score >= 5 ? 'B' : score >= 3 ? 'C' : '—';
+  return { score, grade, signals: sigs.join('、') };
+}
+
+// ── 抓單支 ──────────────────────────────────
+async function fetchOne(id, rawQ) {
+  const s = watchlist.find(x => x.id === id);
+  if (!s) return;
+  try {
+    let q = rawQ || null;
+    if (!q) {
+      const ex  = normMkt(s.market);
+      const url = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch='
+                + ex + '_' + id + '.tw&json=1&_=' + Date.now();
+      const j = await fetchJsonWithProxy(url);
+      if (j && j.msgArray && j.msgArray[0]) q = j.msgArray[0];
+    }
+    if (!q) throw new Error('無即時報價');
+
+    const price = parseFloat(q.z) > 0 ? parseFloat(q.z)
+                : parseFloat(q.pz) > 0 ? parseFloat(q.pz) : 0;
+    if (price <= 0) throw new Error('尚無成交價');
+
+    const prev       = parseFloat(q.y)  || parseFloat(q.pz) || price;
+    const high       = parseFloat(q.h)  > 0 ? parseFloat(q.h) : price;
+    const low        = parseFloat(q.l)  > 0 ? parseFloat(q.l) : price;
+    const vol        = parseInt(q.v)    || 0;
+    const chgPct     = prev > 0 ? (price - prev) / prev * 100 : 0;
+    const vwap       = (high + low + price) / 3;
+    const vwapGap    = vwap > 0 ? (price - vwap) / vwap * 100  : 0;
+    const dayHighGap = high > 0 ? (price - high) / high * 100  : 0;
+
+    // 量比
+    let vr = null;
+    let hist = histCache[id];
+    if (!hist && !histFailed.has(id)) {
+      hist = await fetchHist(id);
+      if (hist) histCache[id] = hist; else histFailed.add(id);
+    }
+    if (hist && hist.avgVol20 > 0) vr = vol / hist.avgVol20;
+    if (hist && hist.ma17Base > 0) s.ma17 = (hist.ma17Base + price) / 17;
+
+    const { score, grade, signals } = scoreIntra(chgPct, vr, vwapGap, dayHighGap);
+
+    // 閃爍
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row && lastData[id] && lastData[id].price) {
+      const prev_ = lastData[id].price;
+      if (price > prev_)      { row.classList.add('fl-u'); setTimeout(() => row.classList.remove('fl-u'), 700); }
+      else if (price < prev_) { row.classList.add('fl-d'); setTimeout(() => row.classList.remove('fl-d'), 700); }
+    }
+
+    lastData[id] = { price, chgPct, volK: vol, vr, vwapGap, dayHighGap, score, grade, signals, _stale: false };
+    lastSucc[id] = Date.now();
+    if (q.n) s.name = q.n;
+    if (q.ex === 'otc') s.market = '上櫃';
+    else if (q.ex === 'tse') s.market = '上市';
+
+  } catch(e) {
+    if (lastData[id] && lastData[id].price)
+      lastData[id] = { ...lastData[id], _stale: true, _errMsg: e.message };
+    else
+      lastData[id] = { _stale: true, _errMsg: e.message };
+  }
+}
+
+// ── 渲染 ────────────────────────────────────
+function renderMon() {
+  const rows = watchlist.map(s => ({ ...s, ...(lastData[s.id]||{}) }));
+  rows.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (va == null) va = sortAsc ? Infinity : -Infinity;
+    if (vb == null) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+
+  document.getElementById('mon-tbody').innerHTML = rows.map(r => {
+    const d = lastData[r.id] || {};
+    const price   = d.price    != null ? d.price.toFixed(2)                              : '—';
+    const chgPct  = d.chgPct   != null ? (d.chgPct  >= 0 ? '+' : '') + d.chgPct.toFixed(2) + '%' : '—';
+    const volK    = d.volK     != null ? d.volK.toLocaleString()                         : '—';
+    const vr      = d.vr       != null ? d.vr.toFixed(2)                                : '—';
+    const vwap    = d.vwapGap  != null ? (d.vwapGap >= 0 ? '+' : '') + d.vwapGap.toFixed(2) + '%'  : '—';
+    const dhGap   = d.dayHighGap != null ? d.dayHighGap.toFixed(2) + '%'                : '—';
+    const scTxt   = d.score    != null ? d.score : '—';
+    // MA17 欄位
+    const ma17Val  = r.ma17 || null;
+    const ma17Disp = ma17Val ? ma17Val.toFixed(2) : '—';
+    const ma17Gap  = (ma17Val && d.price > 0) ? (d.price - ma17Val) / ma17Val * 100 : null;
+    const ma17GapD = ma17Gap != null ? (ma17Gap >= 0 ? '+' : '') + ma17Gap.toFixed(2) + '%' : '—';
+    const ma17GCls = ma17Gap == null ? '' : ma17Gap > 5 ? 'color:#f59e0b;font-weight:700' : ma17Gap >= 0 ? 'color:#f43f5e' : 'color:#22c55e';
+    const sig     = d.signals  || (d._stale ? d._errMsg || '—' : '—');
+    const cls     = d.chgPct > 0 ? 'up' : d.chgPct < 0 ? 'dn' : 'flat';
+    const mkt     = displayMkt(r.market);
+    const mktTag  = mkt === 'unk'
+      ? '<span style="color:var(--muted);font-size:10px">待確認</span>'
+      : `<span class="mkt-${mkt}">${mkt==='otc'?'上櫃':'上市'}</span>`;
+    const neck    = r.neckline && r.neckline !== '—' ? r.neckline : '—';
+    const pat     = r.pattern  || '—';
+    let grHtml = '—';
+    if (d.grade === 'A') grHtml = '<span class="ba">A</span>';
+    else if (d.grade === 'B') grHtml = '<span class="bb">B</span>';
+    else if (d.grade === 'C') grHtml = '<span class="bc">C</span>';
+    let hCnt = 0;
+    if (d.vr >= 2) hCnt += 2; else if (d.vr >= 1.5) hCnt++;
+    if (d.chgPct >= 3) hCnt += 2; else if (d.chgPct >= 1) hCnt++;
+    if (d.vwapGap >= 0) hCnt++;
+    const hCls  = hCnt >= 5 ? 'h4' : hCnt >= 4 ? 'h3' : hCnt >= 2 ? 'h2' : 'h1';
+    const heat  = `<span class="hd ${hCls}"></span>`;
+    let freshHtml = '';
+    if (lastSucc[r.id]) {
+      const age = Math.floor((Date.now()-lastSucc[r.id])/1000);
+      if (d._stale) {
+        freshHtml = `<span class="stale-txt">⚠️${age<60?age+'s前':Math.floor(age/60)+'m前'}</span>`;
+      } else {
+        freshHtml = `<span class="fresh-txt">${new Date(lastSucc[r.id]).toLocaleTimeString('zh-TW')}</span>`;
+      }
+    } else if (d._stale) {
+      freshHtml = `<span class="stale-txt">❌${d._errMsg||''}</span>`;
+    }
+    return `<tr data-id="${r.id}">
+      <td class="lft"><span class="sid-txt">${r.id}</span></td>
+      <td class="lft">
+        <a class="stock-link" href="https://www.wantgoo.com/stock/${r.id}/technical-chart"
+           target="_blank">${r.name} ↗</a>${freshHtml}
+        ${r.industry ? `<div class="ind-txt">${r.industry}</div>` : ''}
+      </td>
+      <td>${mktTag}</td>
+      <td class="neck-v">${neck}</td>
+      <td class="${cls}">${price}</td>
+      <td class="${cls}">${chgPct}</td>
+      <td>${volK}</td>
+      <td>${vr}</td>
+      <td class="${d.vwapGap>=0?'up':'dn'}">${vwap}</td>
+      <td>${dhGap}</td>
+      <td style="font-family:'DM Mono',monospace;color:#a78bfa;font-size:12px">${ma17Disp}</td>
+      <td style="font-size:12px;${ma17GCls}">${ma17GapD}</td>
+      <td><strong>${scTxt}</strong></td>
+      <td>${grHtml}</td>
+      <td>${heat}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis">${sig}</td>
+      <td>${patTag(pat)}</td>
+    </tr>`;
+  }).join('');
+
+  // 摘要
+  const valid = rows.filter(r => lastData[r.id] && lastData[r.id].chgPct != null);
+  document.getElementById('st-cnt').textContent = rows.length;
+  document.getElementById('st-a').textContent   = rows.filter(r=>(lastData[r.id]||{}).grade==='A').length;
+  document.getElementById('st-b').textContent   = rows.filter(r=>(lastData[r.id]||{}).grade==='B').length;
+  document.getElementById('st-up').textContent  = valid.filter(r=>lastData[r.id].chgPct>0).length;
+  document.getElementById('st-dn').textContent  = valid.filter(r=>lastData[r.id].chgPct<0).length;
+  document.getElementById('st-vl').textContent  = rows.filter(r=>(lastData[r.id]||{}).vr>=2).length;
+  document.getElementById('st-vw').textContent  = rows.filter(r=>(lastData[r.id]||{}).vwapGap>=0).length;
+  const avg = valid.length > 0
+    ? valid.reduce((a,r)=>a+lastData[r.id].chgPct,0)/valid.length : null;
+  const avgEl = document.getElementById('st-avg');
+  if (avg != null) {
+    avgEl.textContent = (avg>=0?'+':'')+avg.toFixed(2)+'%';
+    avgEl.className   = 'v '+(avg>=0?'up':'dn');
+  } else avgEl.textContent = '—';
+}
+
+// 排序
+document.querySelectorAll('.mon-tbl th[data-k]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = false; }
+    renderMon();
+  });
+});
+
+// ── 全量更新 ────────────────────────────────
+async function refreshAll() {
+  if (!watchlist.length) { renderMon(); return; }
+  if (refreshing) return;
+  refreshing = true;
+  document.getElementById('lastUpd').textContent = '更新中…';
+  try {
+    const batch = await fetchMisBatch(watchlist);
+    const CHUNK = 10;
+    for (let i = 0; i < watchlist.length; i += CHUNK) {
+      await Promise.all(watchlist.slice(i,i+CHUNK).map(s => fetchOne(s.id, batch[s.id]||null)));
+      renderMon();
+    }
+    document.getElementById('lastUpd').textContent = '更新：'+new Date().toLocaleTimeString('zh-TW');
+  } catch(e) {
+    document.getElementById('lastUpd').textContent = '更新失敗：'+(e.message || e);
+  } finally {
+    refreshing = false;
+  }
+}
+
+function setInt(sec) {
+  REFRESH_SEC = sec;
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = setInterval(refreshAll, REFRESH_SEC*1000); }
+}
+
+function startAuto() {
+  if (autoTimer) clearInterval(autoTimer);
+  refreshAll();
+  autoTimer = setInterval(refreshAll, REFRESH_SEC*1000);
+}
+
+renderMon();
+startAuto();
+</script>
+</body>
+</html>
