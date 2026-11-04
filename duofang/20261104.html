@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8">
-<title>多方選股 v6.1｜台股 Hybrid｜2026-11-04 21:06</title>
+<title>多方選股 v1｜台股｜2026-11-04 21:06</title>
 <style>
 /* ── 全域 ── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,12 +80,13 @@ button { background: #21262d; color: #e6edf3; border: 1px solid #30363d;
 button:hover { background: #30363d; }
 button.primary { background: #238636; border-color: #238636; }
 </style>
+<script>if(location.protocol==='file:'){var s=document.createElement('script');s.src='http://127.0.0.1:8765/api/ping.js';s.onload=function(){location.replace('http://127.0.0.1:8765/'+'duofang/'+location.pathname.split('/').slice(-2).join('/'))};document.head.appendChild(s);}</script>
 </head>
 <body>
 
 <!-- ── 頁頂：標題 + Tab 切換 ── -->
 <div class="page-top">
-  <h1>📊 多方選股 v6.1 + 即時監控</h1>
+  <h1>📊 多方選股 v1 + 即時監控</h1>
   <div class="tab-btns">
     <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
     <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
@@ -137,7 +138,6 @@ button.primary { background: #238636; border-color: #238636; }
       <th data-k="score">盤中分</th>
       <th data-k="grade">盤中評級</th>
       <th>訊號</th>
-      <th data-k="pattern">型態</th>
     </tr></thead>
     <tbody id="mon-tbody"></tbody>
   </table>
@@ -148,10 +148,10 @@ button.primary { background: #238636; border-color: #238636; }
 <div id="tab-screen" class="tab-panel">
   <div style="padding:20px 16px 0">
   <div class="meta">
-    核心分（max 10）= 多頭排列×3 + MA17上彎×1 + MA95×1 + CCI×2 + MACD×2 + 量能×1｜
-    型態分（max 4）= 延續/反轉各取最高，避免重複灌分｜
+    必要條件 = 近5日 MA17 上穿 MA95｜
+    核心分（max 12）= 多頭排列×3 + MA17上彎×1 + MA95×1 + CCI×2 + CCI金叉×2 + MACD×2 + 量能×1｜
     位置分 = 距MA17真正加減分（甜蜜區+2 ～ 過熱-3）｜
-    風險扣分 = 量能差/過熱/型態重疊（最多-2）｜
+    風險扣分 = 量能差/過熱（最多-2）｜
     換手率% = 當日成交股數 ÷ 流通股數 × 100（&gt;10% 紅字＝異常熱絡）｜
     <strong style="color:#58a6ff">點名稱開玩股網技術分析</strong>
   </div>
@@ -163,7 +163,7 @@ button.primary { background: #238636; border-color: #238636; }
     <div class="stat"><div class="val" style="color:#6b7280">8</div>觀察</div>
   </div>
   <div class="search-bar">
-    <input id="search" type="text" placeholder="🔍 搜尋名稱 / 代號 / 型態 / 產業…" oninput="filterTable()">
+    <input id="search" type="text" placeholder="🔍 搜尋名稱 / 代號 / 產業…" oninput="filterTable()">
   </div>
   </div>
   <div class="tbl-wrap" style="padding:0 16px 20px">
@@ -221,7 +221,7 @@ button.primary { background: #238636; border-color: #238636; }
 // ════════════════════════════════════════════════════
 //  嵌入盤後選股資料（由 Python 產生）
 // ════════════════════════════════════════════════════
-const SCREEN_DATA = [{"id": "3045", "name": "台灣大", "market": "tse", "grade": "B", "score": 13, "pattern": "W底突破", "close": 135.0, "volK": 11189, "vr5": 1.21, "shares": 3024054054}, {"id": "4903", "name": "聯光通", "market": "otc", "grade": "B", "score": 12, "pattern": "-", "close": 53.1, "volK": 13289, "vr5": 1.06, "shares": 105301109}, {"id": "3515", "name": "華擎", "market": "tse", "grade": "B", "score": 12, "pattern": "-", "close": 226.0, "volK": 1436, "vr5": 4.4, "shares": 123793103}, {"id": "6756", "name": "威鋒電子", "market": "tse", "grade": "B", "score": 12, "pattern": "頭肩底突破", "close": 119.5, "volK": 3092, "vr5": 1.25, "shares": 69954751}, {"id": "2471", "name": "資通", "market": "tse", "grade": "B", "score": 12, "pattern": "-", "close": 52.5, "volK": 1616, "vr5": 9.88, "shares": 47251462}, {"id": "6150", "name": "撼訊", "market": "otc", "grade": "B", "score": 12, "pattern": "-", "close": 72.9, "volK": 4609, "vr5": 7.65, "shares": 48363064}, {"id": "1802", "name": "台玻", "market": "tse", "grade": "B", "score": 11, "pattern": "-", "close": 66.7, "volK": 278489, "vr5": 2.11, "shares": 2906983299}, {"id": "1809", "name": "中釉", "market": "tse", "grade": "B", "score": 11, "pattern": "-", "close": 46.0, "volK": 6727, "vr5": 0.93, "shares": 166923077}, {"id": "4977", "name": "眾達-KY", "market": "tse", "grade": "B", "score": 11, "pattern": "-", "close": 183.5, "volK": 8923, "vr5": 1.21, "shares": 99254727}, {"id": "4770", "name": "上品", "market": "tse", "grade": "C", "score": 10, "pattern": "-", "close": 292.0, "volK": 1145, "vr5": 0.95, "shares": 80069930}, {"id": "5230", "name": "雷笛克光學", "market": "otc", "grade": "C", "score": 10, "pattern": "-", "close": 27.6, "volK": 4198, "vr5": 1.26, "shares": 65696401}, {"id": "8089", "name": "康全電訊", "market": "otc", "grade": "C", "score": 10, "pattern": "頭肩底突破", "close": 26.7, "volK": 3337, "vr5": 0.79, "shares": 65948617}, {"id": "6708", "name": "天擎", "market": "otc", "grade": "C", "score": 10, "pattern": "-", "close": 69.3, "volK": 1842, "vr5": 2.3, "shares": 28871473}, {"id": "4533", "name": "協易機", "market": "otc", "grade": "C", "score": 10, "pattern": "平台突破", "close": 31.2, "volK": 15691, "vr5": 5.05, "shares": 156910000}, {"id": "2618", "name": "長榮航", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 43.75, "volK": 15709, "vr5": 1.06, "shares": 5416896552}, {"id": "6112", "name": "邁達特", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 48.85, "volK": 8586, "vr5": 2.53, "shares": 188289474}, {"id": "4904", "name": "遠傳", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 114.0, "volK": 7434, "vr5": 0.95, "shares": 3540000000}, {"id": "2412", "name": "中華電", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 161.5, "volK": 16336, "vr5": 1.59, "shares": 7779047619}, {"id": "6148", "name": "驊宏資", "market": "otc", "grade": "C", "score": 9, "pattern": "-", "close": 44.2, "volK": 22711, "vr5": 2.06, "shares": 46605787}, {"id": "7767", "name": "仁大資訊", "market": "otc", "grade": "C", "score": 9, "pattern": "平台突破 / W底突破", "close": 58.4, "volK": 1551, "vr5": 6.11, "shares": 30116505}, {"id": "3031", "name": "佰鴻", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 33.25, "volK": 4036, "vr5": 1.13, "shares": 173218884}, {"id": "5904", "name": "寶雅", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 73.2, "volK": 3507, "vr5": 0.95, "shares": 1062727273}, {"id": "2328", "name": "廣宇", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 52.5, "volK": 8555, "vr5": 0.87, "shares": 518484848}, {"id": "2886", "name": "兆豐金", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 53.5, "volK": 29956, "vr5": 1.57, "shares": 14978000000}, {"id": "2892", "name": "第一金", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 42.45, "volK": 25124, "vr5": 0.93, "shares": 14778823529}, {"id": "3147", "name": "大綜", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 316.5, "volK": 2262, "vr5": 1.3, "shares": 43667954}, {"id": "6234", "name": "高僑", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 49.95, "volK": 7237, "vr5": 1.13, "shares": 100374480}, {"id": "9933", "name": "中鼎", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 47.95, "volK": 11149, "vr5": 1.81, "shares": 961120690}, {"id": "1528", "name": "恩德", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 27.65, "volK": 32766, "vr5": 2.78, "shares": 191278459}, {"id": "2033", "name": "佳大", "market": "tse", "grade": "C", "score": 8, "pattern": "平台突破", "close": 77.1, "volK": 5525, "vr5": 1.69, "shares": 120108696}, {"id": "6697", "name": "東捷資訊", "market": "otc", "grade": "C", "score": 8, "pattern": "頭肩底突破", "close": 63.3, "volK": 1191, "vr5": 0.31, "shares": 27316514}, {"id": "5340", "name": "建榮", "market": "otc", "grade": "觀察", "score": 11, "pattern": "-", "close": 92.3, "volK": 19523, "vr5": 2.08, "shares": 194840319}, {"id": "2610", "name": "華航", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 20.5, "volK": 20188, "vr5": 1.05, "shares": 6117575758}, {"id": "6456", "name": "GIS-KY", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 96.4, "volK": 40793, "vr5": 1.18, "shares": 330307692}, {"id": "6446", "name": "藥華藥", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 1250.0, "volK": 3867, "vr5": 2.01, "shares": 415806452}, {"id": "6757", "name": "台灣虎航", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 54.2, "volK": 1282, "vr5": 1.13, "shares": 457857143}, {"id": "4967", "name": "十銓", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 266.0, "volK": 4031, "vr5": 0.63, "shares": 98557457}, {"id": "3653", "name": "健策", "market": "tse", "grade": "觀察", "score": 8, "pattern": "W底突破", "close": 6450.0, "volK": 3155, "vr5": 1.83, "shares": 147429907}, {"id": "6130", "name": "上亞科技", "market": "otc", "grade": "觀察", "score": 8, "pattern": "平台突破 / W底突破", "close": 27.35, "volK": 1002, "vr5": 2.99, "shares": 49359606}];
+const SCREEN_DATA = [{"id": "3045", "name": "台灣大", "market": "tse", "grade": "B", "score": 13, "close": 135.0, "volK": 11189, "vr5": 1.21, "shares": 3024054054}, {"id": "4903", "name": "聯光通", "market": "otc", "grade": "B", "score": 12, "close": 53.1, "volK": 13289, "vr5": 1.06, "shares": 105301109}, {"id": "3515", "name": "華擎", "market": "tse", "grade": "B", "score": 12, "close": 226.0, "volK": 1436, "vr5": 4.4, "shares": 123793103}, {"id": "6756", "name": "威鋒電子", "market": "tse", "grade": "B", "score": 12, "close": 119.5, "volK": 3092, "vr5": 1.25, "shares": 69954751}, {"id": "2471", "name": "資通", "market": "tse", "grade": "B", "score": 12, "close": 52.5, "volK": 1616, "vr5": 9.88, "shares": 47251462}, {"id": "6150", "name": "撼訊", "market": "otc", "grade": "B", "score": 12, "close": 72.9, "volK": 4609, "vr5": 7.65, "shares": 48363064}, {"id": "1802", "name": "台玻", "market": "tse", "grade": "B", "score": 11, "close": 66.7, "volK": 278489, "vr5": 2.11, "shares": 2906983299}, {"id": "1809", "name": "中釉", "market": "tse", "grade": "B", "score": 11, "close": 46.0, "volK": 6727, "vr5": 0.93, "shares": 166923077}, {"id": "4977", "name": "眾達-KY", "market": "tse", "grade": "B", "score": 11, "close": 183.5, "volK": 8923, "vr5": 1.21, "shares": 99254727}, {"id": "4770", "name": "上品", "market": "tse", "grade": "C", "score": 10, "close": 292.0, "volK": 1145, "vr5": 0.95, "shares": 80069930}, {"id": "5230", "name": "雷笛克光學", "market": "otc", "grade": "C", "score": 10, "close": 27.6, "volK": 4198, "vr5": 1.26, "shares": 65696401}, {"id": "8089", "name": "康全電訊", "market": "otc", "grade": "C", "score": 10, "close": 26.7, "volK": 3337, "vr5": 0.79, "shares": 65948617}, {"id": "6708", "name": "天擎", "market": "otc", "grade": "C", "score": 10, "close": 69.3, "volK": 1842, "vr5": 2.3, "shares": 28871473}, {"id": "4533", "name": "協易機", "market": "otc", "grade": "C", "score": 10, "close": 31.2, "volK": 15691, "vr5": 5.05, "shares": 156910000}, {"id": "2618", "name": "長榮航", "market": "tse", "grade": "C", "score": 9, "close": 43.75, "volK": 15709, "vr5": 1.06, "shares": 5416896552}, {"id": "6112", "name": "邁達特", "market": "tse", "grade": "C", "score": 9, "close": 48.85, "volK": 8586, "vr5": 2.53, "shares": 188289474}, {"id": "4904", "name": "遠傳", "market": "tse", "grade": "C", "score": 9, "close": 114.0, "volK": 7434, "vr5": 0.95, "shares": 3540000000}, {"id": "2412", "name": "中華電", "market": "tse", "grade": "C", "score": 9, "close": 161.5, "volK": 16336, "vr5": 1.59, "shares": 7779047619}, {"id": "6148", "name": "驊宏資", "market": "otc", "grade": "C", "score": 9, "close": 44.2, "volK": 22711, "vr5": 2.06, "shares": 46605787}, {"id": "7767", "name": "仁大資訊", "market": "otc", "grade": "C", "score": 9, "close": 58.4, "volK": 1551, "vr5": 6.11, "shares": 30116505}, {"id": "3031", "name": "佰鴻", "market": "tse", "grade": "C", "score": 8, "close": 33.25, "volK": 4036, "vr5": 1.13, "shares": 173218884}, {"id": "5904", "name": "寶雅", "market": "otc", "grade": "C", "score": 8, "close": 73.2, "volK": 3507, "vr5": 0.95, "shares": 1062727273}, {"id": "2328", "name": "廣宇", "market": "tse", "grade": "C", "score": 8, "close": 52.5, "volK": 8555, "vr5": 0.87, "shares": 518484848}, {"id": "2886", "name": "兆豐金", "market": "tse", "grade": "C", "score": 8, "close": 53.5, "volK": 29956, "vr5": 1.57, "shares": 14978000000}, {"id": "2892", "name": "第一金", "market": "tse", "grade": "C", "score": 8, "close": 42.45, "volK": 25124, "vr5": 0.93, "shares": 14778823529}, {"id": "3147", "name": "大綜", "market": "otc", "grade": "C", "score": 8, "close": 316.5, "volK": 2262, "vr5": 1.3, "shares": 43667954}, {"id": "6234", "name": "高僑", "market": "otc", "grade": "C", "score": 8, "close": 49.95, "volK": 7237, "vr5": 1.13, "shares": 100374480}, {"id": "9933", "name": "中鼎", "market": "tse", "grade": "C", "score": 8, "close": 47.95, "volK": 11149, "vr5": 1.81, "shares": 961120690}, {"id": "1528", "name": "恩德", "market": "tse", "grade": "C", "score": 8, "close": 27.65, "volK": 32766, "vr5": 2.78, "shares": 191278459}, {"id": "2033", "name": "佳大", "market": "tse", "grade": "C", "score": 8, "close": 77.1, "volK": 5525, "vr5": 1.69, "shares": 120108696}, {"id": "6697", "name": "東捷資訊", "market": "otc", "grade": "C", "score": 8, "close": 63.3, "volK": 1191, "vr5": 0.31, "shares": 27316514}, {"id": "5340", "name": "建榮", "market": "otc", "grade": "觀察", "score": 11, "close": 92.3, "volK": 19523, "vr5": 2.08, "shares": 194840319}, {"id": "2610", "name": "華航", "market": "tse", "grade": "觀察", "score": 9, "close": 20.5, "volK": 20188, "vr5": 1.05, "shares": 6117575758}, {"id": "6456", "name": "GIS-KY", "market": "tse", "grade": "觀察", "score": 9, "close": 96.4, "volK": 40793, "vr5": 1.18, "shares": 330307692}, {"id": "6446", "name": "藥華藥", "market": "tse", "grade": "觀察", "score": 9, "close": 1250.0, "volK": 3867, "vr5": 2.01, "shares": 415806452}, {"id": "6757", "name": "台灣虎航", "market": "tse", "grade": "觀察", "score": 8, "close": 54.2, "volK": 1282, "vr5": 1.13, "shares": 457857143}, {"id": "4967", "name": "十銓", "market": "tse", "grade": "觀察", "score": 8, "close": 266.0, "volK": 4031, "vr5": 0.63, "shares": 98557457}, {"id": "3653", "name": "健策", "market": "tse", "grade": "觀察", "score": 8, "close": 6450.0, "volK": 3155, "vr5": 1.83, "shares": 147429907}, {"id": "6130", "name": "上亞科技", "market": "otc", "grade": "觀察", "score": 8, "close": 27.35, "volK": 1002, "vr5": 2.99, "shares": 49359606}];
 
 // ════════════════════════════════════════════════════
 //  Tab 切換
@@ -297,7 +297,7 @@ let watchlist = buildWatchlist();
 function buildWatchlist() {
   return SCREEN_DATA.filter(s => activeGrades.has(s.grade))
     .map(s => ({ id: s.id, name: s.name, market: s.market,
-                 screenGrade: s.grade, screenScore: s.score, pattern: s.pattern || '-' }));
+                 screenGrade: s.grade, screenScore: s.score }));
 }
 
 function reloadWatchlist() {
@@ -583,7 +583,6 @@ function renderMon() {
       '<td><strong>' + scoreTxt + '</strong></td>' +
       '<td>' + gradeHtml + '</td>' +
       '<td class="small">' + signalTxt + '</td>' +
-      '<td class="small" style="color:#8b949e">' + (r.pattern || '—') + '</td>' +
       '</tr>';
   }).join('');
 
