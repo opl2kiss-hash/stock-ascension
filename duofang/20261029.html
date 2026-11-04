@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>多方選股 v6.1｜台股 Hybrid｜2026-10-29 18:55</title>
+<style>
+/* ── 全域 ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Microsoft JhengHei', Arial, sans-serif; background: #0d1117; color: #e6edf3; }
+/* ── Tab 切換列 ── */
+.page-top { background: #161b22; border-bottom: 2px solid #30363d;
+  padding: 10px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 200; }
+.page-top h1 { font-size: 18px; color: #58a6ff; white-space: nowrap; }
+.tab-btns { display: flex; gap: 6px; }
+.tab-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+.tab-btn:hover { background: #30363d; color: #e6edf3; }
+.tab-btn.active { background: #238636; border-color: #2ea043; color: #fff; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+/* ── 選股結果 Tab ── */
+#tab-screen { padding: 20px 16px; }
+.meta { color: #8b949e; font-size: 12px; margin-bottom: 16px; line-height: 1.8; }
+.stat-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.stat { background: #161b22; border: 1px solid #30363d;
+  border-radius: 8px; padding: 8px 18px; font-size: 13px; text-align: center; }
+.stat .val { font-size: 22px; font-weight: bold; color: #58a6ff; }
+.tbl-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 170px); }
+#main-table { border-collapse: collapse; width: 100%; font-size: 12.5px;
+  background: #161b22; min-width: 1600px; }
+#main-table th, #main-table td { border: 1px solid #30363d; padding: 7px 9px;
+  text-align: left; vertical-align: top; white-space: nowrap; }
+#main-table th { background: #1f2937; position: sticky; top: 0;
+  cursor: pointer; user-select: none; z-index: 5; }
+#main-table th:hover { background: #273549; }
+.arrow { margin-left: 4px; color: #8b949e; font-size: 10px; }
+.row-a td { background: #0d2818; }
+.row-b td { background: #0d1e35; }
+.row-c td { background: #2a1f00; }
+.row-w td { background: #1c1c1c; }
+#main-table tr:hover td { filter: brightness(1.25); }
+.search-bar { margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+.search-bar input { background: #161b22; border: 1px solid #30363d; color: #e6edf3;
+  padding: 6px 12px; border-radius: 6px; font-size: 13px; width: 240px; }
+.search-bar input:focus { outline: none; border-color: #58a6ff; }
+/* ── 監控 Tab ── */
+#tab-monitor { padding: 0; }
+.mon-header { padding: 8px 16px; background: #0d1117; border-bottom: 1px solid #30363d;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.mon-stats { display: flex; gap: 16px; padding: 6px 16px; background: #0d1117;
+  border-bottom: 1px solid #30363d; font-size: 12px; color: #8b949e; }
+.mon-stats strong { color: #e6edf3; }
+.mon-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 130px); }
+.mon-tbl { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+.mon-tbl th, .mon-tbl td { padding: 7px 8px; border-bottom: 1px solid #21262d; text-align: right; white-space: nowrap; }
+.mon-tbl th { background: #161b22; color: #8b949e; font-weight: 600;
+  position: sticky; top: 0; z-index: 5; cursor: pointer; user-select: none; }
+.mon-tbl th:hover { color: #58a6ff; }
+.mon-tbl td.lft, .mon-tbl th.lft { text-align: left; }
+.mon-tbl td.name-cell { color: #58a6ff; cursor: pointer; text-align: left; }
+.mon-tbl td.name-cell:hover { text-decoration: underline; }
+.mon-tbl tr:hover { background: #161b22; }
+.up { color: #f85149; } .down { color: #3fb950; } .flat { color: #8b949e; }
+.score-a { background: #1a5e1a; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.score-b { background: #9a6700; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.score-c { background: #6c6c6c; color: #fff; padding: 2px 8px; border-radius: 4px; }
+.badge { padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+.tag-tse { background: #1f6feb; color: #fff; }
+.tag-otc { background: #8957e5; color: #fff; }
+.grade-filter { background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+  padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.grade-filter.on { background: #1f6feb; border-color: #1f6feb; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: #238636; color: #fff;
+  padding: 10px 16px; border-radius: 6px; z-index: 400; opacity: 0; transition: opacity 0.3s; }
+.toast.show { opacity: 1; }
+.toast.err { background: #da3633; }
+button { background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+button:hover { background: #30363d; }
+button.primary { background: #238636; border-color: #238636; }
+</style>
+</head>
+<body>
+
+<!-- ── 頁頂：標題 + Tab 切換 ── -->
+<div class="page-top">
+  <h1>📊 多方選股 v6.1 + 即時監控</h1>
+  <div class="tab-btns">
+    <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
+    <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
+  </div>
+  <span style="color:#8b949e;font-size:12px;">盤前開啟自動帶入 A/B 級個股並即時更新</span>
+</div>
+
+<!-- ══════════ Tab 1：即時監控 ══════════ -->
+<div id="tab-monitor" class="tab-panel">
+  <div class="mon-header">
+    <span style="color:#8b949e;font-size:12px;">載入等級：</span>
+    <button class="grade-filter on" data-g="A"   onclick="toggleGrade(this)">A</button>
+    <button class="grade-filter on" data-g="B"   onclick="toggleGrade(this)">B</button>
+    <button class="grade-filter"    data-g="C"   onclick="toggleGrade(this)">C</button>
+    <button class="grade-filter"    data-g="觀察" onclick="toggleGrade(this)">觀察</button>
+    <button onclick="reloadWatchlist()" style="margin-left:4px;">🔄 重新載入</button>
+    <button class="primary" id="autoBtn" onclick="toggleAuto()">▶️ 啟動自動更新</button>
+    <button onclick="refreshAll()">🔁 立即更新</button>
+    <select id="intSelect" onchange="changeRefreshSec(+this.value)"
+      style="background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px 8px;font-size:12px;">
+      <option value="5">5秒</option><option value="10" selected>10秒</option>
+      <option value="15">15秒</option><option value="30">30秒</option>
+    </select>
+    <span style="color:#8b949e;font-size:12px;" id="lastUpdate"></span>
+    <span style="color:#8b949e;font-size:12px;">資料日 2026/10/29 ｜ 產出 2026-10-29 18:55</span>
+  </div>
+  <div class="mon-stats">
+    <span>監控: <strong id="stCount">0</strong></span>
+    <span>A級訊號: <strong id="stA" class="up">0</strong></span>
+    <span>B級訊號: <strong id="stB" style="color:#d29922">0</strong></span>
+    <span>上漲: <strong id="stUp" class="up">0</strong></span>
+    <span>下跌: <strong id="stDown" class="down">0</strong></span>
+  </div>
+  <div class="mon-wrap">
+  <table class="mon-tbl">
+    <thead><tr>
+      <th class="lft" data-k="id">代號</th>
+      <th class="lft" data-k="name">名稱</th>
+      <th data-k="screenGrade">選股等級</th>
+      <th data-k="screenScore">選股分</th>
+      <th data-k="market">市場</th>
+      <th data-k="price">現價</th>
+      <th data-k="chgPct">漲跌%</th>
+      <th data-k="volK">量(張)</th>
+      <th data-k="turnover">換手率</th>
+      <th data-k="vr">量比</th>
+      <th data-k="vwapGap">距VWAP</th>
+      <th data-k="dayHighGap">距日高</th>
+      <th data-k="score">盤中分</th>
+      <th data-k="grade">盤中評級</th>
+      <th>訊號</th>
+      <th data-k="pattern">型態</th>
+    </tr></thead>
+    <tbody id="mon-tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ══════════ Tab 2：選股結果 ══════════ -->
+<div id="tab-screen" class="tab-panel">
+  <div style="padding:20px 16px 0">
+  <div class="meta">
+    核心分（max 10）= 多頭排列×3 + MA17上彎×1 + MA95×1 + CCI×2 + MACD×2 + 量能×1｜
+    型態分（max 4）= 延續/反轉各取最高，避免重複灌分｜
+    位置分 = 距MA17真正加減分（甜蜜區+2 ～ 過熱-3）｜
+    風險扣分 = 量能差/過熱/型態重疊（最多-2）｜
+    換手率% = 當日成交股數 ÷ 流通股數 × 100（&gt;10% 紅字＝異常熱絡）｜
+    <strong style="color:#58a6ff">點名稱開玩股網技術分析</strong>
+  </div>
+  <div class="stat-bar">
+    <div class="stat"><div class="val">63</div>入選總數</div>
+    <div class="stat"><div class="val" style="color:#16a34a">0</div>A 級</div>
+    <div class="stat"><div class="val" style="color:#2563eb">10</div>B 級</div>
+    <div class="stat"><div class="val" style="color:#d97706">33</div>C 級</div>
+    <div class="stat"><div class="val" style="color:#6b7280">20</div>觀察</div>
+  </div>
+  <div class="search-bar">
+    <input id="search" type="text" placeholder="🔍 搜尋名稱 / 代號 / 型態 / 產業…" oninput="filterTable()">
+  </div>
+  </div>
+  <div class="tbl-wrap" style="padding:0 16px 20px">
+  <table id="main-table">
+  <thead><tr><th onclick="sortTable(this)">等級<span class="arrow">⇅</span></th><th onclick="sortTable(this)">總分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">核心分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">型態分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">觸發分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險扣分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">代號<span class="arrow">⇅</span></th><th onclick="sortTable(this)">名稱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">市場<span class="arrow">⇅</span></th><th onclick="sortTable(this)">產業<span class="arrow">⇅</span></th><th onclick="sortTable(this)">資料日期<span class="arrow">⇅</span></th><th onclick="sortTable(this)">收盤價<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA95<span class="arrow">⇅</span></th><th onclick="sortTable(this)">距MA17%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置說明<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17-MA95距離%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI區間<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DIF<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DEA<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MACD柱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">成交量(張)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">換手率%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比(5日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比狀態<span class="arrow">⇅</span></th><th onclick="sortTable(this)">型態<span class="arrow">⇅</span></th><th onclick="sortTable(this)">原始命中型態數<span class="arrow">⇅</span></th><th onclick="sortTable(this)">訊號摘要<span class="arrow">⇅</span></th><th onclick="sortTable(this)">型態說明<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險提醒<span class="arrow">⇅</span></th></tr></thead>
+  <tbody id="tbody">
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>13</td><td>9</td><td>3</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>6805</td><td><a href="https://www.wantgoo.com/stock/6805/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 富世達 技術分析">富世達</a></td><td>上市</td><td>電子零組件業</td><td>2026/10/29</td><td>2425.0</td><td>2326.76</td><td>1915.49</td><td>+4.22%</td><td>距MA17可接受</td><td>+21.47%</td><td>67.6</td><td>偏多</td><td>38.7543</td><td>38.0979</td><td>1.3128</td><td>1177</td><td>1.72%</td><td>1.10</td><td>→正常</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、頭肩底突破、有型態觸發</td><td>頸線 2280.00</td><td>量能趨勢不佳</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>13</td><td>8</td><td>3</td><td>2</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>4977</td><td><a href="https://www.wantgoo.com/stock/4977/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 眾達-KY 技術分析">眾達-KY</a></td><td>上市</td><td>通信網路業</td><td>2026/10/29</td><td>183.5</td><td>177.29</td><td>160.68</td><td>+3.50%</td><td>距MA17可接受</td><td>+10.34%</td><td>136.0</td><td>超買</td><td>2.1631</td><td>2.3157</td><td>-0.3053</td><td>12976</td><td><span style="color:#f87171;font-weight:bold;">13.07%</span></td><td>3.68</td><td>🔥極度放量</td><td>W底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、W底突破、有型態觸發、量比強(3.68)</td><td>頸線 175.50 / 雙底差 3.6%</td><td>量能趨勢不佳</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>13</td><td>10</td><td>2</td><td>3</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>4967</td><td><a href="https://www.wantgoo.com/stock/4967/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 十銓 技術分析">十銓</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>286.5</td><td>262.56</td><td>257.13</td><td>+9.12%</td><td>開始偏追高</td><td>+2.11%</td><td>149.0</td><td>超買</td><td>-0.1986</td><td>-2.7239</td><td>5.0506</td><td>11992</td><td><span style="color:#f87171;font-weight:bold;">12.17%</span></td><td>5.56</td><td>🔥極度放量</td><td>平台突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量、平台突破、有型態觸發</td><td>突破前20日高 281.00</td><td>CCI過熱</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>13</td><td>10</td><td>4</td><td>3</td><td><span style="color:#f87171;">-2</span></td><td><span style="color:#f87171;">-2</span></td><td>3035</td><td><a href="https://www.wantgoo.com/stock/3035/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 智原 技術分析">智原</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>231.5</td><td>202.15</td><td>192.39</td><td>+14.52%</td><td>明顯追高</td><td>+5.07%</td><td>190.8</td><td>超買</td><td>4.1152</td><td>2.8633</td><td>2.5038</td><td>35563</td><td><span style="color:#f87171;font-weight:bold;">13.65%</span></td><td>15.03</td><td>🔥極度放量</td><td>平台突破 / W底突破</td><td>2</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量、平台突破、W底突破</td><td>突破前20日高 223.50｜頸線 211.00 / 雙底差 0.3%</td><td>爆量但位置過熱、CCI過熱</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>12</td><td>7</td><td>4</td><td>3</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>2352</td><td><a href="https://www.wantgoo.com/stock/2352/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 佳世達 技術分析">佳世達</a></td><td>上市</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>32.8</td><td>29.38</td><td>29.35</td><td>+11.64%</td><td>開始偏追高</td><td>+0.10%</td><td>455.6</td><td>超買</td><td>0.4282</td><td>0.1638</td><td>0.5288</td><td>87217</td><td><span style="color:#fbbf24;">5.52%</span></td><td>18.37</td><td>🔥極度放量</td><td>平台突破 / W底突破</td><td>2</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、平台突破、W底突破、有型態觸發</td><td>突破前20日高 30.15｜頸線 29.55 / 雙底差 0.7%</td><td>CCI過熱</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>5</td><td>3</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>2353</td><td><a href="https://www.wantgoo.com/stock/2353/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 宏碁 技術分析">宏碁</a></td><td>上市</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>32.0</td><td>31.95</td><td>31.7</td><td>+0.16%</td><td>貼近MA17甜蜜區</td><td>+0.79%</td><td>30.6</td><td>偏多</td><td>0.2776</td><td>0.2225</td><td>0.1103</td><td>14509</td><td>0.48%</td><td>0.60</td><td>↓縮量</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、5日均量大於20日均量、頭肩底突破、有型態觸發</td><td>頸線 31.05</td><td>-</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>10</td><td>0</td><td>0</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>4540</td><td><a href="https://www.wantgoo.com/stock/4540/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 全球傳動 技術分析">全球傳動</a></td><td>上市</td><td>電機機械</td><td>2026/10/29</td><td>62.6</td><td>59.76</td><td>57.97</td><td>+4.75%</td><td>距MA17可接受</td><td>+3.09%</td><td>140.2</td><td>超買</td><td>0.5297</td><td>0.1822</td><td>0.6951</td><td>3997</td><td>3.47%</td><td>1.20</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>6</td><td>3</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>6689</td><td><a href="https://www.wantgoo.com/stock/6689/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 伊雲谷 技術分析">伊雲谷</a></td><td>上市</td><td>數位雲端</td><td>2026/10/29</td><td>71.4</td><td>68.33</td><td>63.29</td><td>+4.49%</td><td>距MA17可接受</td><td>+7.96%</td><td>70.4</td><td>偏多</td><td>2.6185</td><td>2.0503</td><td>1.1364</td><td>1421</td><td>2.10%</td><td>1.22</td><td>→正常</td><td>W底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、W底突破、有型態觸發</td><td>頸線 64.80 / 雙底差 2.0%</td><td>-</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>6</td><td>3</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>3029</td><td><a href="https://www.wantgoo.com/stock/3029/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 零壹 技術分析">零壹</a></td><td>上市</td><td>資訊服務業</td><td>2026/10/29</td><td>124.5</td><td>120.44</td><td>110.41</td><td>+3.37%</td><td>距MA17可接受</td><td>+9.08%</td><td>135.0</td><td>超買</td><td>2.4981</td><td>1.8989</td><td>1.1986</td><td>1956</td><td>1.18%</td><td>0.66</td><td>↓縮量</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、頭肩底突破、有型態觸發</td><td>頸線 116.75</td><td>-</td></tr>
+<tr class="row-b"><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>10</td><td>0</td><td>1</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>2451</td><td><a href="https://www.wantgoo.com/stock/2451/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 創見 技術分析">創見</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>294.0</td><td>279.97</td><td>279.18</td><td>+5.01%</td><td>距MA17中性</td><td>+0.28%</td><td>111.2</td><td>超買</td><td>0.0893</td><td>-1.8307</td><td>3.84</td><td>3263</td><td>0.76%</td><td>1.50</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量、收盤接近高點、量比增溫(1.50)</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>8</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>6708</td><td><a href="https://www.wantgoo.com/stock/6708/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 天擎 技術分析">天擎</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>64.6</td><td>64.01</td><td>43.93</td><td>+0.92%</td><td>貼近MA17甜蜜區</td><td>+45.71%</td><td>33.3</td><td>偏多</td><td>3.8422</td><td>4.7648</td><td>-1.8454</td><td>1578</td><td><span style="color:#fbbf24;">5.47%</span></td><td>3.15</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(3.15)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>8</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>3114</td><td><a href="https://www.wantgoo.com/stock/3114/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 好德 技術分析">好德</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>41.4</td><td>40.27</td><td>35.57</td><td>+2.81%</td><td>貼近MA17甜蜜區</td><td>+13.21%</td><td>72.1</td><td>偏多</td><td>1.7321</td><td>1.9216</td><td>-0.3791</td><td>2225</td><td>3.30%</td><td>2.00</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(2.00)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>8</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2618</td><td><a href="https://www.wantgoo.com/stock/2618/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 長榮航 技術分析">長榮航</a></td><td>上市</td><td>航運業</td><td>2026/10/29</td><td>42.75</td><td>42.47</td><td>41.83</td><td>+0.66%</td><td>貼近MA17甜蜜區</td><td>+1.53%</td><td>17.1</td><td>偏多</td><td>0.1156</td><td>0.1239</td><td>-0.0166</td><td>7554</td><td>0.14%</td><td>0.68</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、收盤接近高點</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>5</td><td>3</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2027</td><td><a href="https://www.wantgoo.com/stock/2027/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 大成鋼 技術分析">大成鋼</a></td><td>上市</td><td>鋼鐵工業</td><td>2026/10/29</td><td>50.4</td><td>49.61</td><td>45.56</td><td>+1.59%</td><td>貼近MA17甜蜜區</td><td>+8.89%</td><td>72.3</td><td>偏多</td><td>0.8256</td><td>0.7145</td><td>0.2222</td><td>3267</td><td>0.14%</td><td>0.48</td><td>↓縮量</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、頭肩底突破、有型態觸發</td><td>頸線 47.45</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>9</td><td>0</td><td>0</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>3374</td><td><a href="https://www.wantgoo.com/stock/3374/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 精材 技術分析">精材</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>487.5</td><td>472.15</td><td>375.17</td><td>+3.25%</td><td>距MA17可接受</td><td>+25.85%</td><td>77.7</td><td>偏多</td><td>10.6321</td><td>11.0149</td><td>-0.7655</td><td>18851</td><td><span style="color:#fbbf24;">6.95%</span></td><td>1.15</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>5</td><td>3</td><td>2</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>2886</td><td><a href="https://www.wantgoo.com/stock/2886/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 兆豐金 技術分析">兆豐金</a></td><td>上市</td><td>金融保險業</td><td>2026/10/29</td><td>54.8</td><td>52.35</td><td>48.16</td><td>+4.68%</td><td>距MA17可接受</td><td>+8.70%</td><td>85.3</td><td>偏多</td><td>1.3898</td><td>1.1315</td><td>0.5165</td><td>15374</td><td>0.10%</td><td>0.97</td><td>→正常</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、頭肩底突破、有型態觸發、收盤接近高點</td><td>頸線 47.48</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>10</td><td>6</td><td>3</td><td>1</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>6277</td><td><a href="https://www.wantgoo.com/stock/6277/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 宏正 技術分析">宏正</a></td><td>上市</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>93.1</td><td>88.26</td><td>78.22</td><td>+5.48%</td><td>距MA17中性</td><td>+12.84%</td><td>56.7</td><td>偏多</td><td>5.1021</td><td>4.0448</td><td>2.1147</td><td>1111</td><td>0.93%</td><td>0.37</td><td>↓縮量</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、頭肩底突破、有型態觸發</td><td>頸線 77.40</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>8</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2883</td><td><a href="https://www.wantgoo.com/stock/2883/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 凱基金 技術分析">凱基金</a></td><td>上市</td><td>金融保險業</td><td>2026/10/29</td><td>38.5</td><td>38.2</td><td>33.36</td><td>+0.79%</td><td>貼近MA17甜蜜區</td><td>+14.51%</td><td>66.1</td><td>偏多</td><td>0.3628</td><td>0.4917</td><td>-0.2577</td><td>24324</td><td>0.14%</td><td>0.69</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>7</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>1907</td><td><a href="https://www.wantgoo.com/stock/1907/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 永豐餘 技術分析">永豐餘</a></td><td>上市</td><td>造紙工業</td><td>2026/10/29</td><td>28.55</td><td>28.48</td><td>28.46</td><td>+0.25%</td><td>貼近MA17甜蜜區</td><td>+0.07%</td><td>12.1</td><td>偏多</td><td>-0.0869</td><td>-0.1228</td><td>0.0718</td><td>1311</td><td>0.08%</td><td>1.64</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、收盤接近高點、量比增溫(1.64)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>6214</td><td><a href="https://www.wantgoo.com/stock/6214/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 精誠 技術分析">精誠</a></td><td>上市</td><td>資訊服務業</td><td>2026/10/29</td><td>202.0</td><td>196.18</td><td>165.95</td><td>+2.97%</td><td>貼近MA17甜蜜區</td><td>+18.22%</td><td>97.8</td><td>偏多</td><td>4.3873</td><td>4.2328</td><td>0.3089</td><td>1111</td><td>0.41%</td><td>0.92</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、收盤接近高點</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>8</td><td>0</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>4903</td><td><a href="https://www.wantgoo.com/stock/4903/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 聯光通 技術分析">聯光通</a></td><td>上櫃</td><td>通信網路業</td><td>2026/10/29</td><td>51.9</td><td>50.13</td><td>40.07</td><td>+3.53%</td><td>距MA17可接受</td><td>+25.11%</td><td>54.9</td><td>偏多</td><td>2.7903</td><td>3.2346</td><td>-0.8887</td><td>12490</td><td><span style="color:#f87171;font-weight:bold;">11.86%</span></td><td>2.18</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(2.18)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>8</td><td>0</td><td>0</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>1528</td><td><a href="https://www.wantgoo.com/stock/1528/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 恩德 技術分析">恩德</a></td><td>上市</td><td>電機機械</td><td>2026/10/29</td><td>25.8</td><td>24.63</td><td>22.08</td><td>+4.75%</td><td>距MA17可接受</td><td>+11.55%</td><td>116.8</td><td>超買</td><td>0.7784</td><td>0.7307</td><td>0.0953</td><td>9567</td><td><span style="color:#fbbf24;">5.00%</span></td><td>0.64</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD金叉、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>7</td><td>0</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>2379</td><td><a href="https://www.wantgoo.com/stock/2379/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 瑞昱 技術分析">瑞昱</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>794.0</td><td>770.06</td><td>730.99</td><td>+3.11%</td><td>距MA17可接受</td><td>+5.34%</td><td>86.6</td><td>偏多</td><td>15.3805</td><td>14.3365</td><td>2.088</td><td>2282</td><td>0.45%</td><td>0.86</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、收盤接近高點</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>5</td><td>3</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>4938</td><td><a href="https://www.wantgoo.com/stock/4938/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 和碩 技術分析">和碩</a></td><td>上市</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>104.5</td><td>99.77</td><td>89.55</td><td>+4.74%</td><td>距MA17可接受</td><td>+11.41%</td><td>76.3</td><td>偏多</td><td>3.9534</td><td>3.3571</td><td>1.1927</td><td>8324</td><td>0.31%</td><td>0.65</td><td>↓縮量</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、頭肩底突破、有型態觸發</td><td>頸線 88.60</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>8</td><td>0</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#f87171;">-1</span></td><td>2492</td><td><a href="https://www.wantgoo.com/stock/2492/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 華新科 技術分析">華新科</a></td><td>上市</td><td>電子零組件業</td><td>2026/10/29</td><td>423.0</td><td>394.74</td><td>361.54</td><td>+7.16%</td><td>距MA17中性</td><td>+9.18%</td><td>88.6</td><td>偏多</td><td>17.3863</td><td>18.6532</td><td>-2.5338</td><td>55694</td><td><span style="color:#f87171;font-weight:bold;">11.48%</span></td><td>2.09</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、收盤接近高點、量比強(2.09)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>9</td><td>7</td><td>2</td><td>2</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>2892</td><td><a href="https://www.wantgoo.com/stock/2892/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 第一金 技術分析">第一金</a></td><td>上市</td><td>金融保險業</td><td>2026/10/29</td><td>44.45</td><td>40.96</td><td>35.55</td><td>+8.52%</td><td>開始偏追高</td><td>+15.22%</td><td>148.8</td><td>超買</td><td>1.3913</td><td>1.1492</td><td>0.4843</td><td>37098</td><td>0.26%</td><td>1.97</td><td>↑量能增加</td><td>平台突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、平台突破、有型態觸發、收盤接近高點</td><td>突破前20日高 43.55</td><td>CCI過熱</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>7</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2882</td><td><a href="https://www.wantgoo.com/stock/2882/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 國泰金 技術分析">國泰金</a></td><td>上市</td><td>金融保險業</td><td>2026/10/29</td><td>116.5</td><td>113.47</td><td>104.91</td><td>+2.67%</td><td>貼近MA17甜蜜區</td><td>+8.16%</td><td>168.7</td><td>超買</td><td>1.3829</td><td>1.327</td><td>0.1117</td><td>10689</td><td>0.07%</td><td>0.51</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD金叉</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>5309</td><td><a href="https://www.wantgoo.com/stock/5309/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 系統電 技術分析">系統電</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>69.5</td><td>69.09</td><td>58.85</td><td>+0.59%</td><td>貼近MA17甜蜜區</td><td>+17.40%</td><td>36.0</td><td>偏多</td><td>3.0691</td><td>3.6452</td><td>-1.1523</td><td>7595</td><td>3.30%</td><td>2.17</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、量比強(2.17)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>3293</td><td><a href="https://www.wantgoo.com/stock/3293/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 鈊象 技術分析">鈊象</a></td><td>上櫃</td><td>文化創意業</td><td>2026/10/29</td><td>808.0</td><td>792.35</td><td>745.91</td><td>+1.98%</td><td>貼近MA17甜蜜區</td><td>+6.23%</td><td>99.1</td><td>偏多</td><td>12.948</td><td>13.953</td><td>-2.0101</td><td>1570</td><td>0.56%</td><td>1.72</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、收盤接近高點、量比增溫(1.72)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>8042</td><td><a href="https://www.wantgoo.com/stock/8042/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 金山電 技術分析">金山電</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>141.0</td><td>137.35</td><td>133.05</td><td>+2.66%</td><td>貼近MA17甜蜜區</td><td>+3.23%</td><td>29.4</td><td>偏多</td><td>5.6067</td><td>6.3711</td><td>-1.5287</td><td>8700</td><td><span style="color:#fbbf24;">6.57%</span></td><td>0.85</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、收盤接近高點</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2890</td><td><a href="https://www.wantgoo.com/stock/2890/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 永豐金 技術分析">永豐金</a></td><td>上市</td><td>金融保險業</td><td>2026/10/29</td><td>46.45</td><td>45.26</td><td>40.88</td><td>+2.63%</td><td>貼近MA17甜蜜區</td><td>+10.71%</td><td>111.9</td><td>超買</td><td>0.7759</td><td>0.7237</td><td>0.1045</td><td>17707</td><td>0.12%</td><td>0.85</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、收盤接近高點</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>6672</td><td><a href="https://www.wantgoo.com/stock/6672/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 騰輝電子-KY 技術分析">騰輝電子-KY</a></td><td>上市</td><td>電子零組件業</td><td>2026/10/29</td><td>566.0</td><td>555.44</td><td>322.68</td><td>+1.90%</td><td>貼近MA17甜蜜區</td><td>+72.13%</td><td>55.1</td><td>偏多</td><td>57.4725</td><td>65.4403</td><td>-15.9354</td><td>10717</td><td><span style="color:#f87171;font-weight:bold;">15.00%</span></td><td>1.64</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、量比增溫(1.64)</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>6269</td><td><a href="https://www.wantgoo.com/stock/6269/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 台郡 技術分析">台郡</a></td><td>上市</td><td>電子零組件業</td><td>2026/10/29</td><td>75.8</td><td>73.98</td><td>66.78</td><td>+2.46%</td><td>貼近MA17甜蜜區</td><td>+10.78%</td><td>40.4</td><td>偏多</td><td>3.9092</td><td>3.4917</td><td>0.8352</td><td>36072</td><td><span style="color:#f87171;font-weight:bold;">11.25%</span></td><td>0.50</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>5465</td><td><a href="https://www.wantgoo.com/stock/5465/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 富驊 技術分析">富驊</a></td><td>上櫃</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>36.9</td><td>36.6</td><td>26.67</td><td>+0.82%</td><td>貼近MA17甜蜜區</td><td>+37.23%</td><td>25.4</td><td>偏多</td><td>2.6747</td><td>2.8949</td><td>-0.4406</td><td>1374</td><td>0.93%</td><td>0.44</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>2633</td><td><a href="https://www.wantgoo.com/stock/2633/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 台灣高鐵 技術分析">台灣高鐵</a></td><td>上市</td><td>航運業</td><td>2026/10/29</td><td>26.15</td><td>26.11</td><td>25.79</td><td>+0.15%</td><td>貼近MA17甜蜜區</td><td>+1.24%</td><td>39.5</td><td>偏多</td><td>0.1384</td><td>0.1082</td><td>0.0605</td><td>2036</td><td>0.04%</td><td>0.35</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>5013</td><td><a href="https://www.wantgoo.com/stock/5013/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 強新 技術分析">強新</a></td><td>上櫃</td><td>鋼鐵工業</td><td>2026/10/29</td><td>50.1</td><td>48.2</td><td>31.3</td><td>+3.94%</td><td>距MA17可接受</td><td>+53.99%</td><td>80.9</td><td>偏多</td><td>3.9946</td><td>4.1936</td><td>-0.398</td><td>2646</td><td>1.98%</td><td>2.32</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量、量比強(2.32)</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>8</td><td>0</td><td>0</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>6456</td><td><a href="https://www.wantgoo.com/stock/6456/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 GIS-KY 技術分析">GIS-KY</a></td><td>上市</td><td>光電業</td><td>2026/10/29</td><td>102.5</td><td>96.69</td><td>73.67</td><td>+6.01%</td><td>距MA17中性</td><td>+31.25%</td><td>114.3</td><td>超買</td><td>6.3447</td><td>6.0723</td><td>0.5448</td><td>50319</td><td><span style="color:#f87171;font-weight:bold;">15.24%</span></td><td>1.47</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD金叉、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>8</td><td>0</td><td>0</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>3498</td><td><a href="https://www.wantgoo.com/stock/3498/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 陽程 技術分析">陽程</a></td><td>上櫃</td><td>其他電子業</td><td>2026/10/29</td><td>256.0</td><td>240.21</td><td>166.83</td><td>+6.57%</td><td>距MA17中性</td><td>+43.98%</td><td>167.2</td><td>超買</td><td>13.5634</td><td>13.1122</td><td>0.9024</td><td>5611</td><td><span style="color:#fbbf24;">9.29%</span></td><td>1.21</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD金叉、5日均量大於20日均量</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>7</td><td>0</td><td>1</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>1808</td><td><a href="https://www.wantgoo.com/stock/1808/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 潤隆 技術分析">潤隆</a></td><td>上市</td><td>建材營造業</td><td>2026/10/29</td><td>36.95</td><td>34.38</td><td>31.94</td><td>+7.48%</td><td>距MA17中性</td><td>+7.64%</td><td>131.2</td><td>超買</td><td>0.9498</td><td>0.6289</td><td>0.642</td><td>2242</td><td>0.25%</td><td>0.63</td><td>↓縮量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、收盤接近高點</td><td>-</td><td>-</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>8</td><td>0</td><td>2</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>3105</td><td><a href="https://www.wantgoo.com/stock/3105/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 穩懋 技術分析">穩懋</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>594.0</td><td>537.53</td><td>443.32</td><td>+10.51%</td><td>開始偏追高</td><td>+21.25%</td><td>84.8</td><td>偏多</td><td>9.9966</td><td>11.0728</td><td>-2.1525</td><td>58520</td><td><span style="color:#f87171;font-weight:bold;">13.80%</span></td><td>3.92</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、MACD柱放大、收盤接近高點、量比強(3.92)</td><td>-</td><td>量能趨勢不佳</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>7</td><td>2</td><td>3</td><td><span style="color:#f87171;">-2</span></td><td><span style="color:#f87171;">-2</span></td><td>6233</td><td><a href="https://www.wantgoo.com/stock/6233/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 旺玖 技術分析">旺玖</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>30.9</td><td>26.1</td><td>22.88</td><td>+18.39%</td><td>明顯追高</td><td>+14.07%</td><td>216.1</td><td>超買</td><td>1.7021</td><td>1.3495</td><td>0.7053</td><td>8233</td><td><span style="color:#f87171;font-weight:bold;">10.59%</span></td><td>13.39</td><td>🔥極度放量</td><td>平台突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、平台突破、有型態觸發、收盤接近高點</td><td>突破前20日高 28.15</td><td>爆量但位置過熱、CCI過熱</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>7</td><td>3</td><td>2</td><td><span style="color:#ef4444;font-weight:bold;">-3</span></td><td><span style="color:#f87171;">-1</span></td><td>4960</td><td><a href="https://www.wantgoo.com/stock/4960/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 誠美材 技術分析">誠美材</a></td><td>上市</td><td>光電業</td><td>2026/10/29</td><td>35.0</td><td>27.66</td><td>23.71</td><td>+26.54%</td><td>過熱追價區</td><td>+16.66%</td><td>161.4</td><td>超買</td><td>2.9472</td><td>2.0497</td><td>1.795</td><td>81963</td><td><span style="color:#f87171;font-weight:bold;">14.49%</span></td><td>2.37</td><td>📈大量放大</td><td>W底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、W底突破、有型態觸發、量比強(2.37)</td><td>頸線 24.55 / 雙底差 3.8%</td><td>CCI過熱</td></tr>
+<tr class="row-c"><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>7</td><td>3</td><td>2</td><td><span style="color:#ef4444;font-weight:bold;">-3</span></td><td><span style="color:#f87171;">-1</span></td><td>8089</td><td><a href="https://www.wantgoo.com/stock/8089/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 康全電訊 技術分析">康全電訊</a></td><td>上櫃</td><td>通信網路業</td><td>2026/10/29</td><td>29.0</td><td>23.07</td><td>19.7</td><td>+25.70%</td><td>過熱追價區</td><td>+17.11%</td><td>122.9</td><td>超買</td><td>2.3627</td><td>1.6937</td><td>1.3379</td><td>2855</td><td>4.33%</td><td>1.29</td><td>→正常</td><td>頭肩底突破</td><td>1</td><td>多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、頭肩底突破、有型態觸發、收盤接近高點</td><td>頸線 17.75</td><td>CCI過熱</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>13</td><td>8</td><td>3</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>6425</td><td><a href="https://www.wantgoo.com/stock/6425/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 易發 技術分析">易發</a></td><td>上櫃</td><td>電機機械</td><td>2026/10/29</td><td>77.8</td><td>74.69</td><td>66.86</td><td>+4.16%</td><td>距MA17可接受</td><td>+11.71%</td><td>100.7</td><td>超買</td><td>2.0719</td><td>2.0842</td><td>-0.0246</td><td>1940</td><td>3.82%</td><td>1.37</td><td>→正常</td><td>W底突破</td><td>1</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、5日均量大於20日均量、W底突破、有型態觸發</td><td>頸線 76.20 / 雙底差 0.7%</td><td>MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>10</td><td>8</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>3324</td><td><a href="https://www.wantgoo.com/stock/3324/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 雙鴻 技術分析">雙鴻</a></td><td>上櫃</td><td>其他電子業</td><td>2026/10/29</td><td>1465.0</td><td>1445.29</td><td>1177.71</td><td>+1.36%</td><td>貼近MA17甜蜜區</td><td>+22.72%</td><td>9.3</td><td>偏多</td><td>-1.2133</td><td>12.2866</td><td>-26.9998</td><td>5575</td><td><span style="color:#fbbf24;">5.99%</span></td><td>1.69</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、5日均量大於20日均量、量比增溫(1.69)</td><td>-</td><td>MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>10</td><td>8</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>8215</td><td><a href="https://www.wantgoo.com/stock/8215/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 明基材 技術分析">明基材</a></td><td>上市</td><td>光電業</td><td>2026/10/29</td><td>29.05</td><td>28.36</td><td>26.73</td><td>+2.43%</td><td>貼近MA17甜蜜區</td><td>+6.10%</td><td>99.5</td><td>偏多</td><td>0.4927</td><td>0.5271</td><td>-0.0688</td><td>3662</td><td>1.14%</td><td>1.59</td><td>↑量能增加</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、5日均量大於20日均量、量比增溫(1.59)</td><td>-</td><td>MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>10</td><td>5</td><td>3</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>4562</td><td><a href="https://www.wantgoo.com/stock/4562/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 穎漢 技術分析">穎漢</a></td><td>上市</td><td>電機機械</td><td>2026/10/29</td><td>32.3</td><td>30.22</td><td>31.73</td><td>+6.88%</td><td>距MA17中性</td><td>-4.76%</td><td>341.7</td><td>超買</td><td>0.0823</td><td>-0.1083</td><td>0.3811</td><td>1144</td><td>1.31%</td><td>10.29</td><td>🔥極度放量</td><td>W底突破</td><td>1</td><td>MA17上彎、CCI上穿0軸、MACD柱放大、5日均量大於20日均量、W底突破、有型態觸發、量比強(10.29)</td><td>頸線 30.70 / 雙底差 0.8%</td><td>未站穩多頭排列</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>7</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>6538</td><td><a href="https://www.wantgoo.com/stock/6538/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 倉和 技術分析">倉和</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>316.0</td><td>307.06</td><td>223.15</td><td>+2.91%</td><td>貼近MA17甜蜜區</td><td>+37.60%</td><td>24.3</td><td>偏多</td><td>-4.4782</td><td>-1.9886</td><td>-4.9792</td><td>5417</td><td><span style="color:#f87171;font-weight:bold;">14.53%</span></td><td>3.83</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(3.83)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>7</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2061</td><td><a href="https://www.wantgoo.com/stock/2061/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 風青 技術分析">風青</a></td><td>上櫃</td><td>電器電纜</td><td>2026/10/29</td><td>64.6</td><td>62.99</td><td>57.24</td><td>+2.56%</td><td>貼近MA17甜蜜區</td><td>+10.05%</td><td>38.6</td><td>偏多</td><td>1.2974</td><td>1.6386</td><td>-0.6824</td><td>3076</td><td><span style="color:#fbbf24;">5.36%</span></td><td>2.73</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(2.73)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>7</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2408</td><td><a href="https://www.wantgoo.com/stock/2408/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 南亞科 技術分析">南亞科</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>477.0</td><td>470.65</td><td>465.21</td><td>+1.35%</td><td>貼近MA17甜蜜區</td><td>+1.17%</td><td>3.5</td><td>偏多</td><td>-14.5798</td><td>-14.4528</td><td>-0.254</td><td>61804</td><td>1.79%</td><td>2.06</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、量比強(2.06)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>6</td><td>0</td><td>2</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>6727</td><td><a href="https://www.wantgoo.com/stock/6727/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 亞泰金屬 技術分析">亞泰金屬</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>499.5</td><td>496.62</td><td>451.35</td><td>+0.58%</td><td>貼近MA17甜蜜區</td><td>+10.03%</td><td>-17.7</td><td>中性</td><td>-10.5941</td><td>-4.4811</td><td>-12.2262</td><td>2128</td><td><span style="color:#fbbf24;">7.92%</span></td><td>2.74</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿-100、MACD柱放大、收盤接近高點、量比強(2.74)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>8</td><td>0</td><td>1</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#f87171;">-1</span></td><td>5351</td><td><a href="https://www.wantgoo.com/stock/5351/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 鈺創 技術分析">鈺創</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>113.0</td><td>107.91</td><td>102.97</td><td>+4.72%</td><td>距MA17可接受</td><td>+4.80%</td><td>70.6</td><td>偏多</td><td>-0.8177</td><td>-1.4718</td><td>1.3082</td><td>14476</td><td>4.42%</td><td>2.55</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD金叉、量比強(2.55)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>6</td><td>0</td><td>2</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>6719</td><td><a href="https://www.wantgoo.com/stock/6719/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 力智 技術分析">力智</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>190.0</td><td>182.56</td><td>211.0</td><td>+4.08%</td><td>距MA17可接受</td><td>-13.48%</td><td>50.7</td><td>偏多</td><td>-2.3846</td><td>-3.0022</td><td>1.2352</td><td>3023</td><td>2.86%</td><td>10.72</td><td>🔥極度放量</td><td>-</td><td>0</td><td>MA17上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量、收盤接近高點、量比強(10.72)</td><td>-</td><td>未站穩多頭排列</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>9</td><td>9</td><td>0</td><td>1</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#8b949e;">0</span></td><td>3006</td><td><a href="https://www.wantgoo.com/stock/3006/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 晶豪科 技術分析">晶豪科</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>282.5</td><td>253.47</td><td>248.34</td><td>+11.45%</td><td>開始偏追高</td><td>+2.07%</td><td>85.0</td><td>偏多</td><td>-3.6675</td><td>-7.0104</td><td>6.6857</td><td>30671</td><td><span style="color:#f87171;font-weight:bold;">10.78%</span></td><td>3.88</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量、量比強(3.88)</td><td>-</td><td>MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>2426</td><td><a href="https://www.wantgoo.com/stock/2426/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 鼎元 技術分析">鼎元</a></td><td>上市</td><td>光電業</td><td>2026/10/29</td><td>97.0</td><td>95.7</td><td>82.19</td><td>+1.36%</td><td>貼近MA17甜蜜區</td><td>+16.44%</td><td>-9.7</td><td>中性</td><td>-1.4765</td><td>-0.6647</td><td>-1.6236</td><td>45573</td><td><span style="color:#f87171;font-weight:bold;">15.16%</span></td><td>7.01</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿-100、MACD柱放大、量比強(7.01)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>6</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>6155</td><td><a href="https://www.wantgoo.com/stock/6155/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 鈞寶 技術分析">鈞寶</a></td><td>上市</td><td>電子零組件業</td><td>2026/10/29</td><td>70.5</td><td>69.35</td><td>65.81</td><td>+1.66%</td><td>貼近MA17甜蜜區</td><td>+5.38%</td><td>34.8</td><td>偏多</td><td>1.9111</td><td>2.3498</td><td>-0.8772</td><td>5461</td><td><span style="color:#fbbf24;">6.20%</span></td><td>2.01</td><td>📈大量放大</td><td>-</td><td>0</td><td>多頭排列、CCI上穿0軸、MACD柱放大、量比強(2.01)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>6173</td><td><a href="https://www.wantgoo.com/stock/6173/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 信昌電 技術分析">信昌電</a></td><td>上櫃</td><td>電子零組件業</td><td>2026/10/29</td><td>298.0</td><td>293.7</td><td>267.55</td><td>+1.46%</td><td>貼近MA17甜蜜區</td><td>+9.77%</td><td>-26.5</td><td>中性</td><td>-1.4512</td><td>0.5082</td><td>-3.9187</td><td>13695</td><td><span style="color:#fbbf24;">9.11%</span></td><td>1.34</td><td>→正常</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、MACD柱放大、5日均量大於20日均量</td><td>-</td><td>MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>6</td><td>0</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>6770</td><td><a href="https://www.wantgoo.com/stock/6770/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 力積電 技術分析">力積電</a></td><td>上市</td><td>半導體業</td><td>2026/10/29</td><td>69.5</td><td>69.23</td><td>69.87</td><td>+0.39%</td><td>貼近MA17甜蜜區</td><td>-0.92%</td><td>2.1</td><td>偏多</td><td>-0.792</td><td>-0.8916</td><td>0.1991</td><td>122897</td><td>2.58%</td><td>1.27</td><td>→正常</td><td>-</td><td>0</td><td>MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量</td><td>-</td><td>未站穩多頭排列、MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>5</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>4916</td><td><a href="https://www.wantgoo.com/stock/4916/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 事欣科 技術分析">事欣科</a></td><td>上市</td><td>電腦及週邊設備業</td><td>2026/10/29</td><td>104.0</td><td>101.87</td><td>102.08</td><td>+2.09%</td><td>貼近MA17甜蜜區</td><td>-0.21%</td><td>106.5</td><td>超買</td><td>0.2709</td><td>0.1714</td><td>0.1989</td><td>12192</td><td><span style="color:#fbbf24;">9.91%</span></td><td>7.34</td><td>🔥極度放量</td><td>-</td><td>0</td><td>CCI上穿0軸、MACD金叉、5日均量大於20日均量、量比強(7.34)</td><td>-</td><td>未站穩多頭排列、MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>5</td><td>0</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>3260</td><td><a href="https://www.wantgoo.com/stock/3260/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 威剛 技術分析">威剛</a></td><td>上櫃</td><td>半導體業</td><td>2026/10/29</td><td>362.0</td><td>352.85</td><td>378.71</td><td>+2.59%</td><td>貼近MA17甜蜜區</td><td>-6.83%</td><td>33.6</td><td>偏多</td><td>-9.231</td><td>-10.3492</td><td>2.2364</td><td>13794</td><td>4.08%</td><td>3.13</td><td>🔥極度放量</td><td>-</td><td>0</td><td>CCI上穿0軸、MACD金叉、5日均量大於20日均量、量比強(3.13)</td><td>-</td><td>未站穩多頭排列、MA17未上彎</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>4</td><td>0</td><td>2</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>1736</td><td><a href="https://www.wantgoo.com/stock/1736/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 喬山 技術分析">喬山</a></td><td>上市</td><td>運動休閒</td><td>2026/10/29</td><td>123.5</td><td>122.18</td><td>125.21</td><td>+1.08%</td><td>貼近MA17甜蜜區</td><td>-2.42%</td><td>-28.8</td><td>中性</td><td>-0.8429</td><td>-1.0521</td><td>0.4183</td><td>1009</td><td>0.33%</td><td>2.61</td><td>📈大量放大</td><td>-</td><td>0</td><td>MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、收盤接近高點、量比強(2.61)</td><td>-</td><td>未站穩多頭排列</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>7</td><td>0</td><td>0</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>2049</td><td><a href="https://www.wantgoo.com/stock/2049/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 上銀 技術分析">上銀</a></td><td>上市</td><td>電機機械</td><td>2026/10/29</td><td>337.0</td><td>323.56</td><td>336.25</td><td>+4.15%</td><td>距MA17可接受</td><td>-3.77%</td><td>49.1</td><td>偏多</td><td>-4.198</td><td>-7.0299</td><td>5.6637</td><td>2338</td><td>0.66%</td><td>0.72</td><td>↓縮量</td><td>-</td><td>0</td><td>MA17上彎、MA95走平上彎、CCI上穿0軸、MACD金叉、5日均量大於20日均量</td><td>-</td><td>未站穩多頭排列</td></tr>
+<tr class="row-w"><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>7</td><td>0</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#f87171;">-1</span></td><td>2221</td><td><a href="https://www.wantgoo.com/stock/2221/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 大甲 技術分析">大甲</a></td><td>上櫃</td><td>其他業</td><td>2026/10/29</td><td>159.5</td><td>149.79</td><td>85.03</td><td>+6.48%</td><td>距MA17中性</td><td>+76.16%</td><td>5.7</td><td>偏多</td><td>3.0142</td><td>5.8572</td><td>-5.686</td><td>2561</td><td><span style="color:#fbbf24;">6.05%</span></td><td>4.70</td><td>🔥極度放量</td><td>-</td><td>0</td><td>多頭排列、MA95走平上彎、CCI上穿0軸、MACD柱放大、收盤接近高點、量比強(4.70)</td><td>-</td><td>MA17未上彎、量能趨勢不佳</td></tr>
+
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  嵌入盤後選股資料（由 Python 產生）
+// ════════════════════════════════════════════════════
+const SCREEN_DATA = [{"id": "6805", "name": "富世達", "market": "tse", "grade": "B", "score": 13, "pattern": "頭肩底突破", "close": 2425.0, "volK": 1177, "vr5": 1.1, "shares": 68430233}, {"id": "4977", "name": "眾達-KY", "market": "tse", "grade": "B", "score": 13, "pattern": "W底突破", "close": 183.5, "volK": 12976, "vr5": 3.68, "shares": 99280796}, {"id": "4967", "name": "十銓", "market": "tse", "grade": "B", "score": 13, "pattern": "平台突破", "close": 286.5, "volK": 11992, "vr5": 5.56, "shares": 98537387}, {"id": "3035", "name": "智原", "market": "tse", "grade": "B", "score": 13, "pattern": "平台突破 / W底突破", "close": 231.5, "volK": 35563, "vr5": 15.03, "shares": 260534799}, {"id": "2352", "name": "佳世達", "market": "tse", "grade": "B", "score": 12, "pattern": "平台突破 / W底突破", "close": 32.8, "volK": 87217, "vr5": 18.37, "shares": 1580018116}, {"id": "2353", "name": "宏碁", "market": "tse", "grade": "B", "score": 11, "pattern": "頭肩底突破", "close": 32.0, "volK": 14509, "vr5": 0.6, "shares": 3022708333}, {"id": "4540", "name": "全球傳動", "market": "tse", "grade": "B", "score": 11, "pattern": "-", "close": 62.6, "volK": 3997, "vr5": 1.2, "shares": 115187320}, {"id": "6689", "name": "伊雲谷", "market": "tse", "grade": "B", "score": 11, "pattern": "W底突破", "close": 71.4, "volK": 1421, "vr5": 1.22, "shares": 67666667}, {"id": "3029", "name": "零壹", "market": "tse", "grade": "B", "score": 11, "pattern": "頭肩底突破", "close": 124.5, "volK": 1956, "vr5": 0.66, "shares": 165762712}, {"id": "2451", "name": "創見", "market": "tse", "grade": "B", "score": 11, "pattern": "-", "close": 294.0, "volK": 3263, "vr5": 1.5, "shares": 429342105}, {"id": "6708", "name": "天擎", "market": "otc", "grade": "C", "score": 10, "pattern": "-", "close": 64.6, "volK": 1578, "vr5": 3.15, "shares": 28848263}, {"id": "3114", "name": "好德", "market": "otc", "grade": "C", "score": 10, "pattern": "-", "close": 41.4, "volK": 2225, "vr5": 2.0, "shares": 67424242}, {"id": "2618", "name": "長榮航", "market": "tse", "grade": "C", "score": 10, "pattern": "-", "close": 42.75, "volK": 7554, "vr5": 0.68, "shares": 5395714286}, {"id": "2027", "name": "大成鋼", "market": "tse", "grade": "C", "score": 10, "pattern": "頭肩底突破", "close": 50.4, "volK": 3267, "vr5": 0.48, "shares": 2333571429}, {"id": "3374", "name": "精材", "market": "otc", "grade": "C", "score": 10, "pattern": "-", "close": 487.5, "volK": 18851, "vr5": 1.15, "shares": 271237410}, {"id": "2886", "name": "兆豐金", "market": "tse", "grade": "C", "score": 10, "pattern": "頭肩底突破", "close": 54.8, "volK": 15374, "vr5": 0.97, "shares": 15374000000}, {"id": "6277", "name": "宏正", "market": "tse", "grade": "C", "score": 10, "pattern": "頭肩底突破", "close": 93.1, "volK": 1111, "vr5": 0.37, "shares": 119462366}, {"id": "2883", "name": "凱基金", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 38.5, "volK": 24324, "vr5": 0.69, "shares": 17374285714}, {"id": "1907", "name": "永豐餘", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 28.55, "volK": 1311, "vr5": 1.64, "shares": 1638750000}, {"id": "6214", "name": "精誠", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 202.0, "volK": 1111, "vr5": 0.92, "shares": 270975610}, {"id": "4903", "name": "聯光通", "market": "otc", "grade": "C", "score": 9, "pattern": "-", "close": 51.9, "volK": 12490, "vr5": 2.18, "shares": 105311973}, {"id": "1528", "name": "恩德", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 25.8, "volK": 9567, "vr5": 0.64, "shares": 191340000}, {"id": "2379", "name": "瑞昱", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 794.0, "volK": 2282, "vr5": 0.86, "shares": 507111111}, {"id": "4938", "name": "和碩", "market": "tse", "grade": "C", "score": 9, "pattern": "頭肩底突破", "close": 104.5, "volK": 8324, "vr5": 0.65, "shares": 2685161290}, {"id": "2492", "name": "華新科", "market": "tse", "grade": "C", "score": 9, "pattern": "-", "close": 423.0, "volK": 55694, "vr5": 2.09, "shares": 485139373}, {"id": "2892", "name": "第一金", "market": "tse", "grade": "C", "score": 9, "pattern": "平台突破", "close": 44.45, "volK": 37098, "vr5": 1.97, "shares": 14268461538}, {"id": "2882", "name": "國泰金", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 116.5, "volK": 10689, "vr5": 0.51, "shares": 15270000000}, {"id": "5309", "name": "系統電", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 69.5, "volK": 7595, "vr5": 2.17, "shares": 230151515}, {"id": "3293", "name": "鈊象", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 808.0, "volK": 1570, "vr5": 1.72, "shares": 280357143}, {"id": "8042", "name": "金山電", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 141.0, "volK": 8700, "vr5": 0.85, "shares": 132420091}, {"id": "2890", "name": "永豐金", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 46.45, "volK": 17707, "vr5": 0.85, "shares": 14755833333}, {"id": "6672", "name": "騰輝電子-KY", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 566.0, "volK": 10717, "vr5": 1.64, "shares": 71446667}, {"id": "6269", "name": "台郡", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 75.8, "volK": 36072, "vr5": 0.5, "shares": 320640000}, {"id": "5465", "name": "富驊", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 36.9, "volK": 1374, "vr5": 0.44, "shares": 147741935}, {"id": "2633", "name": "台灣高鐵", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 26.15, "volK": 2036, "vr5": 0.35, "shares": 5090000000}, {"id": "5013", "name": "強新", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 50.1, "volK": 2646, "vr5": 2.32, "shares": 133636364}, {"id": "6456", "name": "GIS-KY", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 102.5, "volK": 50319, "vr5": 1.47, "shares": 330177165}, {"id": "3498", "name": "陽程", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 256.0, "volK": 5611, "vr5": 1.21, "shares": 60398278}, {"id": "1808", "name": "潤隆", "market": "tse", "grade": "C", "score": 8, "pattern": "-", "close": 36.95, "volK": 2242, "vr5": 0.63, "shares": 896800000}, {"id": "3105", "name": "穩懋", "market": "otc", "grade": "C", "score": 8, "pattern": "-", "close": 594.0, "volK": 58520, "vr5": 3.92, "shares": 424057971}, {"id": "6233", "name": "旺玖", "market": "otc", "grade": "C", "score": 8, "pattern": "平台突破", "close": 30.9, "volK": 8233, "vr5": 13.39, "shares": 77743154}, {"id": "4960", "name": "誠美材", "market": "tse", "grade": "C", "score": 8, "pattern": "W底突破", "close": 35.0, "volK": 81963, "vr5": 2.37, "shares": 565652174}, {"id": "8089", "name": "康全電訊", "market": "otc", "grade": "C", "score": 8, "pattern": "頭肩底突破", "close": 29.0, "volK": 2855, "vr5": 1.29, "shares": 65935335}, {"id": "6425", "name": "易發", "market": "otc", "grade": "觀察", "score": 13, "pattern": "W底突破", "close": 77.8, "volK": 1940, "vr5": 1.37, "shares": 50785340}, {"id": "3324", "name": "雙鴻", "market": "otc", "grade": "觀察", "score": 10, "pattern": "-", "close": 1465.0, "volK": 5575, "vr5": 1.69, "shares": 93071786}, {"id": "8215", "name": "明基材", "market": "tse", "grade": "觀察", "score": 10, "pattern": "-", "close": 29.05, "volK": 3662, "vr5": 1.59, "shares": 321228070}, {"id": "4562", "name": "穎漢", "market": "tse", "grade": "觀察", "score": 10, "pattern": "W底突破", "close": 32.3, "volK": 1144, "vr5": 10.29, "shares": 87328244}, {"id": "6538", "name": "倉和", "market": "otc", "grade": "觀察", "score": 9, "pattern": "-", "close": 316.0, "volK": 5417, "vr5": 3.83, "shares": 37281487}, {"id": "2061", "name": "風青", "market": "otc", "grade": "觀察", "score": 9, "pattern": "-", "close": 64.6, "volK": 3076, "vr5": 2.73, "shares": 57388060}, {"id": "2408", "name": "南亞科", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 477.0, "volK": 61804, "vr5": 2.06, "shares": 3452737430}, {"id": "6727", "name": "亞泰金屬", "market": "otc", "grade": "觀察", "score": 9, "pattern": "-", "close": 499.5, "volK": 2128, "vr5": 2.74, "shares": 26868687}, {"id": "5351", "name": "鈺創", "market": "otc", "grade": "觀察", "score": 9, "pattern": "-", "close": 113.0, "volK": 14476, "vr5": 2.55, "shares": 327511312}, {"id": "6719", "name": "力智", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 190.0, "volK": 3023, "vr5": 10.72, "shares": 105699301}, {"id": "3006", "name": "晶豪科", "market": "tse", "grade": "觀察", "score": 9, "pattern": "-", "close": 282.5, "volK": 30671, "vr5": 3.88, "shares": 284517625}, {"id": "2426", "name": "鼎元", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 97.0, "volK": 45573, "vr5": 7.01, "shares": 300613456}, {"id": "6155", "name": "鈞寶", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 70.5, "volK": 5461, "vr5": 2.01, "shares": 88080645}, {"id": "6173", "name": "信昌電", "market": "otc", "grade": "觀察", "score": 8, "pattern": "-", "close": 298.0, "volK": 13695, "vr5": 1.34, "shares": 150329308}, {"id": "6770", "name": "力積電", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 69.5, "volK": 122897, "vr5": 1.27, "shares": 4763449612}, {"id": "4916", "name": "事欣科", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 104.0, "volK": 12192, "vr5": 7.34, "shares": 123027245}, {"id": "3260", "name": "威剛", "market": "otc", "grade": "觀察", "score": 8, "pattern": "-", "close": 362.0, "volK": 13794, "vr5": 3.13, "shares": 338088235}, {"id": "1736", "name": "喬山", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 123.5, "volK": 1009, "vr5": 2.61, "shares": 305757576}, {"id": "2049", "name": "上銀", "market": "tse", "grade": "觀察", "score": 8, "pattern": "-", "close": 337.0, "volK": 2338, "vr5": 0.72, "shares": 354242424}, {"id": "2221", "name": "大甲", "market": "otc", "grade": "觀察", "score": 8, "pattern": "-", "close": 159.5, "volK": 2561, "vr5": 4.7, "shares": 42330579}];
+
+// ════════════════════════════════════════════════════
+//  Tab 切換
+// ════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name));
+  // 切到監控頁時若尚未啟動，自動開始
+  if (name === 'monitor' && !autoTimer) { startAuto(); }
+}
+
+// ════════════════════════════════════════════════════
+//  選股結果 Table JS
+// ════════════════════════════════════════════════════
+function sortTable(th) {
+  const table = document.getElementById('main-table');
+  const tbody = table.querySelector('tbody');
+  const ths   = Array.from(table.querySelectorAll('thead th'));
+  const col   = ths.indexOf(th);
+  const asc   = th.dataset.asc !== 'true';
+  th.dataset.asc = asc;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const av = a.cells[col].innerText.trim();
+    const bv = b.cells[col].innerText.trim();
+    const an = parseFloat(av), bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+    return asc ? av.localeCompare(bv, 'zh-TW') : bv.localeCompare(av, 'zh-TW');
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(tr => {
+    tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  即時監控 JS
+// ════════════════════════════════════════════════════
+const CORS_PROXIES = [
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(url),
+  url => 'https://cors.eu.org/' + url,
+];
+
+let lastSources = null;
+let lastQuoteErr = '';
+let REFRESH_SEC = 10;
+let autoTimer   = null;
+let sortKey     = 'score';
+let sortAsc     = false;
+let lastData    = {};
+let lastSuccessTime = {};
+let histCache   = {};
+let sharesCache = {};
+
+// 從 SCREEN_DATA 預先填充 sharesCache
+SCREEN_DATA.forEach(s => { if (s.shares) sharesCache[s.id] = s.shares; });
+
+const sharesFailed = new Set();
+const histFailed   = new Set();
+
+// 等級過濾狀態
+let activeGrades = new Set(['A', 'B']);
+
+let watchlist = buildWatchlist();
+
+function buildWatchlist() {
+  return SCREEN_DATA.filter(s => activeGrades.has(s.grade))
+    .map(s => ({ id: s.id, name: s.name, market: s.market,
+                 screenGrade: s.grade, screenScore: s.score, pattern: s.pattern || '-' }));
+}
+
+function reloadWatchlist() {
+  watchlist = buildWatchlist();
+  lastData  = {};
+  lastSuccessTime = {};
+  renderMon();
+  refreshAll();
+  toast('已重新載入 ' + watchlist.length + ' 檔個股');
+}
+
+function toggleGrade(btn) {
+  const g = btn.dataset.g;
+  if (activeGrades.has(g)) { activeGrades.delete(g); btn.classList.remove('on'); }
+  else { activeGrades.add(g); btn.classList.add('on'); }
+}
+
+function normalizeMarket(m) {
+  if (!m) return 'tse';
+  const s = String(m).toLowerCase();
+  if (s === 'otc' || s === 'tse') return s;
+  if (/otc|tpex|上櫃|櫃買/.test(m)) return 'otc';
+  return 'tse';
+}
+
+// ── 先取得 TWSE MIS session cookie，再呼叫報價 API ──
+let _misCookieReady = false;
+async function ensureMisCookie() {
+  if (_misCookieReady) return;
+  try {
+    await fetch('https://mis.twse.com.tw/stock/index.jsp', {
+      credentials: 'include', mode: 'no-cors'
+    });
+    _misCookieReady = true;
+  } catch(e) {}
+}
+
+// ── fetch with 5s timeout，先直接打，失敗才試 CORS proxy ──
+async function fetchJsonWithProxy(url) {
+  async function ft(u, ms=6000, opts={}) {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const r = await fetch(u, { signal: ctrl.signal, ...opts });
+      clearTimeout(tid);
+      if (r.ok) return await r.json();
+      return null;
+    } catch(e) { clearTimeout(tid); return null; }
+  }
+  // 先帶 cookie 直接試
+  await ensureMisCookie();
+  const direct = await ft(url, 6000, { credentials: 'include' });
+  if (direct) return direct;
+  // 再試不帶 cookie
+  const direct2 = await ft(url);
+  if (direct2) return direct2;
+  // 最後試 CORS proxy
+  for (const px of CORS_PROXIES) {
+    const res = await ft(px(url));
+    if (res) return res;
+  }
+  throw new Error('所有來源都失敗');
+}
+
+
+async function fetchMisBatch(stocks) {
+  if (!stocks || stocks.length === 0) return {};
+
+  const result = {};
+  const CHUNK = 50;
+
+  for (let i = 0; i < stocks.length; i += CHUNK) {
+    const batch = stocks.slice(i, i + CHUNK);
+    const specs = batch.map(s =>
+      s.id + ':' + normalizeMarket(s.market)
+    ).join(',');
+
+    try {
+      const url = 'http:' + '//127.0.0.1:8765/api/quotes?stocks='
+                + encodeURIComponent(specs);
+
+      const response = await fetch(url, {
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        throw new Error('本機報價服務 HTTP ' + response.status);
+      }
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        throw new Error(data.error || '本機報價失敗');
+      }
+
+      (data.msgArray || []).forEach(q => {
+        if (q && q.c) result[q.c] = q;
+      });
+      lastSources = data.sources || lastSources;
+      lastQuoteErr = '';
+
+    } catch (e) {
+      console.warn('本機報價失敗：', e.message);
+      lastQuoteErr = location.protocol === 'https:'
+        ? '公開網頁沒有即時報價，顯示選股日收盤；即時報價請開本機 127.0.0.1:8765'
+        : '⚠️ 本機報價服務未回應，顯示選股日收盤';
+    }
+  }
+
+  return result;
+}
+
+async function fetchFinMindHist(id) {
+  try {
+    const url = 'http:' + '//127.0.0.1:8765/api/history?id='
+              + encodeURIComponent(id);
+
+    const response = await fetch(url, {
+      cache: 'no-store'
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    if (!data.ok) return null;
+
+    return {
+      avgVol20: data.avgVol20
+    };
+
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchOne(id, preQ) {
+  const s = watchlist.find(x => x.id === id);
+  if (!s) return;
+  try {
+    let q = preQ || null;
+    if (!q) throw new Error('即時報價暫不可用');
+
+    // q.z = 成交價（盤中），可能為 "-" 表示尚未成交；q.pz = 昨收
+    const price = parseFloat(q.z) > 0 ? parseFloat(q.z)
+                : parseFloat(q.pz) > 0 ? parseFloat(q.pz) : 0;
+    // 若取不到有效價格（0 或負值），保留舊資料而非顯示錯誤數字
+    if (price <= 0) throw new Error('尚無成交價，保留舊資料');
+
+    const prev  = parseFloat(q.y) || parseFloat(q.pz) || price;
+    const high  = parseFloat(q.h) > 0 ? parseFloat(q.h) : price;
+    const low   = parseFloat(q.l) > 0 ? parseFloat(q.l) : price;
+    const vol   = parseInt(q.v)   || 0;
+    const chgPct = prev > 0 ? ((price - prev) / prev) * 100 : 0;
+    const vwap   = (high + low + price) / 3;
+    const vwapGap   = vwap > 0 ? ((price - vwap) / vwap) * 100 : 0;
+    const dayHighGap = high > 0 ? ((price - high) / high) * 100 : 0;
+
+    // 量比
+    let vr = null;
+    const today = new Date().toISOString().slice(0, 10);
+    let hist = histCache[id];
+    if (!hist) {
+      try { const c = localStorage.getItem('hist_' + id + '_' + today); if (c) hist = JSON.parse(c); } catch(e) {}
+    }
+    if (!hist && !histFailed.has(id)) {
+      hist = await fetchFinMindHist(id);
+      if (hist) {
+        histCache[id] = hist;
+        try { localStorage.setItem('hist_' + id + '_' + today, JSON.stringify(hist)); } catch(e) {}
+      } else { histFailed.add(id); }
+    }
+    if (hist && hist.avgVol20 > 0) vr = vol / hist.avgVol20;
+
+    // 換手率
+    let turnover = null;
+    const shares = sharesCache[id];
+    if (shares && shares > 0 && vol > 0) turnover = (vol * 1000 / shares) * 100;
+
+    const { score, grade, signals } = scoreIntraday(chgPct, vr, vwapGap, dayHighGap);
+    lastData[id] = { price, chgPct, volK: vol, vr, turnover, vwapGap, dayHighGap, score, grade, signals, _stale: !!q._stale, _errMsg: q._stale ? '報價暫未更新' : '' };
+    lastSuccessTime[id] = Date.now();
+    if (q.n) s.name = q.n;
+  } catch(e) {
+    if (lastData[id] && lastData[id].price != null) {
+      lastData[id] = { ...lastData[id], _stale: true, _errMsg: e.message };
+    } else if (s.close > 0) {
+      // 沒有即時報價時，顯示報表內的選股日資料並明確標示，不留空白
+      lastData[id] = { price: s.close, volK: s.volK != null ? s.volK : null, vr: s.vr5 != null ? s.vr5 : null,
+                       signals: '選股日收盤（非即時）', _stale: true, _errMsg: '選股日收盤（非即時）' };
+    } else {
+      lastData[id] = { _stale: true, _errMsg: e.message };
+    }
+  }
+}
+
+function scoreIntraday(chgPct, vr, vwapGap, dayHighGap) {
+  let score = 0; const signals = [];
+  if (chgPct >= 2 && chgPct <= 7) { score += 3; signals.push('漲2-7%'); }
+  else if (chgPct > 7) { score += 1; signals.push('⚠️過熱'); }
+  else if (chgPct >= 1) { score += 1; }
+  if (vr != null) {
+    if (vr >= 2) { score += 3; signals.push('爆量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1.5) { score += 2; signals.push('放量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1)  { score += 1; }
+  }
+  if (vwapGap >= 0)  { score += 2; signals.push('站上VWAP'); } else { score -= 1; }
+  if (dayHighGap >= -0.5) { score += 2; signals.push('貼近日高'); }
+  else if (dayHighGap >= -1.5) { score += 1; }
+  let grade = '—';
+  if (score >= 8) grade = 'A'; else if (score >= 5) grade = 'B'; else if (score >= 3) grade = 'C';
+  return { score, grade, signals: signals.join('、') };
+}
+
+function renderMon() {
+  const tb = document.getElementById('mon-tbody');
+  const rows = watchlist.map(s => ({ ...s, ...(lastData[s.id] || {}) }));
+  rows.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (va == null) va = sortAsc ? Infinity : -Infinity;
+    if (vb == null) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+  tb.innerHTML = rows.map(r => {
+    const price   = r.price    != null ? r.price.toFixed(2)    : '—';
+    const chgPct  = r.chgPct   != null ? (r.chgPct >= 0 ? '+' : '') + r.chgPct.toFixed(2) + '%' : '—';
+    const chgCls  = r.chgPct > 0 ? 'up' : r.chgPct < 0 ? 'down' : 'flat';
+    const volK    = r.volK     != null ? r.volK.toLocaleString() : '—';
+    const vr      = r.vr       != null ? r.vr.toFixed(2)        : '—';
+    const vwapGap = r.vwapGap  != null ? (r.vwapGap >= 0 ? '+' : '') + r.vwapGap.toFixed(2) + '%' : '—';
+    const dhGap   = r.dayHighGap != null ? r.dayHighGap.toFixed(2) + '%' : '—';
+    const scoreTxt = r.score != null ? r.score : '—';
+    let   toHtml  = '—';
+    if (r.turnover != null) {
+      const t = r.turnover;
+      const style = t >= 10 ? 'color:#f85149;font-weight:bold' : t >= 5 ? 'color:#d29922' : 'color:#e6edf3';
+      toHtml = '<span style="' + style + '">' + t.toFixed(2) + '%</span>';
+    }
+    let gradeHtml = '—';
+    if (r.grade === 'A') gradeHtml = '<span class="score-a">A</span>';
+    else if (r.grade === 'B') gradeHtml = '<span class="score-b">B</span>';
+    else if (r.grade === 'C') gradeHtml = '<span class="score-c">C</span>';
+
+    let sgHtml = '—';
+    if (r.screenGrade === 'A') sgHtml = '<span class="score-a">A</span>';
+    else if (r.screenGrade === 'B') sgHtml = '<span class="score-b">B</span>';
+    else if (r.screenGrade === 'C') sgHtml = '<span class="score-c">C</span>';
+    else if (r.screenGrade) sgHtml = '<span class="score-c">' + r.screenGrade + '</span>';
+
+    const mkt = normalizeMarket(r.market);
+    const mktTag = '<span class="badge tag-' + mkt + '">' + (mkt === 'otc' ? '上櫃' : '上市') + '</span>';
+
+    const lastOk = lastSuccessTime[r.id];
+    let freshHtml = ''; let rowStyle = '';
+    if (lastOk) {
+      const ageSec = Math.floor((Date.now() - lastOk) / 1000);
+      if (r._stale) {
+        const ageStr = ageSec < 60 ? ageSec + 's前' : Math.floor(ageSec/60) + 'm前';
+        freshHtml = '<span title="最後成功：' + new Date(lastOk).toLocaleTimeString('zh-TW') + '\n錯誤：' + (r._errMsg||'') + '" style="color:#d29922;font-size:10px;margin-left:4px">⚠️' + ageStr + '</span>';
+        rowStyle = 'opacity:0.75';
+      } else {
+        freshHtml = '<span style="color:#3fb950;font-size:10px;margin-left:3px">' + new Date(lastOk).toLocaleTimeString('zh-TW') + '</span>';
+      }
+    } else if (r._stale) {
+      freshHtml = '<span style="color:#f85149;font-size:11px">❌' + (r._errMsg||'無資料') + '</span>';
+    }
+    const signalTxt = (!r._stale && r.signals) ? r.signals : (r._stale && r.price != null ? (r.signals || '—') : '—');
+
+    return '<tr style="' + rowStyle + '">' +
+      '<td class="lft">' + r.id + '</td>' +
+      '<td class="name-cell" onclick="openChart(' + r.id + ')">' + r.name + freshHtml + '</td>' +
+      '<td>' + sgHtml + '</td>' +
+      '<td>' + (r.screenScore || '—') + '</td>' +
+      '<td>' + mktTag + '</td>' +
+      '<td class="' + chgCls + '">' + price + '</td>' +
+      '<td class="' + chgCls + '">' + chgPct + '</td>' +
+      '<td>' + volK + '</td>' +
+      '<td>' + toHtml + '</td>' +
+      '<td>' + vr + '</td>' +
+      '<td class="' + (r.vwapGap >= 0 ? 'up' : 'down') + '">' + vwapGap + '</td>' +
+      '<td>' + dhGap + '</td>' +
+      '<td><strong>' + scoreTxt + '</strong></td>' +
+      '<td>' + gradeHtml + '</td>' +
+      '<td class="small">' + signalTxt + '</td>' +
+      '<td class="small" style="color:#8b949e">' + (r.pattern || '—') + '</td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('stCount').textContent = rows.length;
+  document.getElementById('stA').textContent  = rows.filter(r => r.grade === 'A').length;
+  document.getElementById('stB').textContent  = rows.filter(r => r.grade === 'B').length;
+  document.getElementById('stUp').textContent = rows.filter(r => r.chgPct > 0).length;
+  document.getElementById('stDown').textContent = rows.filter(r => r.chgPct < 0).length;
+}
+
+document.querySelectorAll('.mon-tbl th[data-k]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = false; }
+    renderMon();
+  });
+});
+
+function openChart(id) { window.open('https://www.wantgoo.com/stock/' + id + '/technical-chart', '_blank'); }
+
+async function refreshAll() {
+  if (watchlist.length === 0) { renderMon(); return; }
+  const quotes = await fetchMisBatch(watchlist);
+  const BATCH = 20;
+  for (let i = 0; i < watchlist.length; i += BATCH) {
+    const sl = watchlist.slice(i, i + BATCH);
+    await Promise.all(sl.map(s => fetchOne(s.id, quotes[s.id])));
+    // 只在最後一批完成後才重新排序+渲染，避免中途資料不全造成畫面跳動
+    if (i + BATCH >= watchlist.length) renderMon();
+  }
+  const src = lastSources || {};
+  const names = [src.mis ? 'MIS ' + src.mis : '', src.yahoo ? 'Yahoo ' + src.yahoo : '', src.cache ? '暫存 ' + src.cache : ''].filter(Boolean).join('、');
+  document.getElementById('lastUpdate').textContent = lastQuoteErr ||
+    ('報價 ' + new Date().toLocaleTimeString('zh-TW') + (names ? '（' + names + ' 檔）' : ''));
+}
+
+function startAuto() {
+  if (autoTimer) return;
+  refreshAll();
+  autoTimer = setInterval(refreshAll, REFRESH_SEC * 1000);
+  document.getElementById('autoBtn').textContent = '⏸ 停止自動更新';
+}
+function toggleAuto() {
+  if (autoTimer) {
+    clearInterval(autoTimer); autoTimer = null;
+    document.getElementById('autoBtn').textContent = '▶️ 啟動自動更新';
+  } else { startAuto(); }
+}
+function changeRefreshSec(sec) {
+  REFRESH_SEC = sec;
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = setInterval(refreshAll, REFRESH_SEC * 1000); }
+}
+
+function toast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── 頁面載入：預設開選股結果 Tab（盤後立即可看）
+// 切到「即時監控」頁籤時會自動啟動更新（switchTab 內已處理）
+switchTab('screen');
+</script>
+</body>
+</html>

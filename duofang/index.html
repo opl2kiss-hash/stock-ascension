@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多方選股 報告</title>
+<style>
+:root{--bg:#0b0f1a;--surface:#111827;--border:#1e2d45;--accent:#a78bfa;--text:#e2e8f0;--muted:#64748b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans TC","PingFang TC",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:48px 16px}
+.wrap{width:min(560px,100%)}
+h1{font-size:30px;font-weight:900;color:var(--accent);margin-bottom:8px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7}
+.list{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+a.item{display:flex;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);color:var(--text);text-decoration:none;font-family:monospace;font-size:17px}
+a.item:last-child{border-bottom:none}
+a.item:hover{background:rgba(167,139,250,.08)}
+.tag{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:20px;padding:2px 8px;margin-left:10px;font-family:inherit}
+.msg{padding:32px;text-align:center;color:var(--muted)}
+.foot{font-size:12px;color:var(--muted);margin-top:18px}
+</style></head><body><div class="wrap">
+<h1>多方選股 v6.1</h1>
+<div class="sub">每個交易日盤後更新。公開網頁顯示選股日收盤；即時報價需在執行服務的電腦上開啟本機網址。</div>
+<div class="list" id="list"><div class="msg">載入中…</div></div>
+<div class="foot">資料來源：Yahoo Finance · 僅供技術分析參考，不構成投資建議</div>
+</div>
+<script>
+fetch('reports.json?v='+Date.now()).then(r=>r.json()).then(ds=>{
+  const el=document.getElementById('list');
+  if(!ds.length){el.innerHTML='<div class="msg">尚無報告</div>';return}
+  el.innerHTML=ds.map((d,i)=>`<a class="item" href="${d}.html"><span>${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}${i===0?'<span class="tag">最新</span>':''}</span><span>→</span></a>`).join('');
+}).catch(()=>{document.getElementById('list').innerHTML='<div class="msg">找不到報告資料</div>'});
+</script></body></html>
