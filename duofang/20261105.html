@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>多方選股 v1｜台股｜2026-11-05 18:25</title>
+<style>
+/* ── 全域 ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Microsoft JhengHei', Arial, sans-serif; background: #0d1117; color: #e6edf3; }
+/* ── Tab 切換列 ── */
+.page-top { background: #161b22; border-bottom: 2px solid #30363d;
+  padding: 10px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 200; }
+.page-top h1 { font-size: 18px; color: #58a6ff; white-space: nowrap; }
+.tab-btns { display: flex; gap: 6px; }
+.tab-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+.tab-btn:hover { background: #30363d; color: #e6edf3; }
+.tab-btn.active { background: #238636; border-color: #2ea043; color: #fff; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+/* ── 選股結果 Tab ── */
+#tab-screen { padding: 20px 16px; }
+.meta { color: #8b949e; font-size: 12px; margin-bottom: 16px; line-height: 1.8; }
+.stat-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.stat { background: #161b22; border: 1px solid #30363d;
+  border-radius: 8px; padding: 8px 18px; font-size: 13px; text-align: center; }
+.stat .val { font-size: 22px; font-weight: bold; color: #58a6ff; }
+.tbl-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 170px); }
+#main-table { border-collapse: collapse; width: 100%; font-size: 12.5px;
+  background: #161b22; min-width: 1600px; }
+#main-table th, #main-table td { border: 1px solid #30363d; padding: 7px 9px;
+  text-align: left; vertical-align: top; white-space: nowrap; }
+#main-table th { background: #1f2937; position: sticky; top: 0;
+  cursor: pointer; user-select: none; z-index: 5; }
+#main-table th:hover { background: #273549; }
+.arrow { margin-left: 4px; color: #8b949e; font-size: 10px; }
+.row-a td { background: #0d2818; }
+.row-b td { background: #0d1e35; }
+.row-c td { background: #2a1f00; }
+.row-w td { background: #1c1c1c; }
+#main-table tr:hover td { filter: brightness(1.25); }
+.search-bar { margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+.search-bar input { background: #161b22; border: 1px solid #30363d; color: #e6edf3;
+  padding: 6px 12px; border-radius: 6px; font-size: 13px; width: 240px; }
+.search-bar input:focus { outline: none; border-color: #58a6ff; }
+/* ── 監控 Tab ── */
+#tab-monitor { padding: 0; }
+.mon-header { padding: 8px 16px; background: #0d1117; border-bottom: 1px solid #30363d;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.mon-stats { display: flex; gap: 16px; padding: 6px 16px; background: #0d1117;
+  border-bottom: 1px solid #30363d; font-size: 12px; color: #8b949e; }
+.mon-stats strong { color: #e6edf3; }
+.mon-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 130px); }
+.mon-tbl { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+.mon-tbl th, .mon-tbl td { padding: 7px 8px; border-bottom: 1px solid #21262d; text-align: right; white-space: nowrap; }
+.mon-tbl th { background: #161b22; color: #8b949e; font-weight: 600;
+  position: sticky; top: 0; z-index: 5; cursor: pointer; user-select: none; }
+.mon-tbl th:hover { color: #58a6ff; }
+.mon-tbl td.lft, .mon-tbl th.lft { text-align: left; }
+.mon-tbl td.name-cell { color: #58a6ff; cursor: pointer; text-align: left; }
+.mon-tbl td.name-cell:hover { text-decoration: underline; }
+.mon-tbl tr:hover { background: #161b22; }
+.up { color: #f85149; } .down { color: #3fb950; } .flat { color: #8b949e; }
+.score-a { background: #1a5e1a; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.score-b { background: #9a6700; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.score-c { background: #6c6c6c; color: #fff; padding: 2px 8px; border-radius: 4px; }
+.badge { padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+.tag-tse { background: #1f6feb; color: #fff; }
+.tag-otc { background: #8957e5; color: #fff; }
+.grade-filter { background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+  padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.grade-filter.on { background: #1f6feb; border-color: #1f6feb; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: #238636; color: #fff;
+  padding: 10px 16px; border-radius: 6px; z-index: 400; opacity: 0; transition: opacity 0.3s; }
+.toast.show { opacity: 1; }
+.toast.err { background: #da3633; }
+button { background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+button:hover { background: #30363d; }
+button.primary { background: #238636; border-color: #238636; }
+</style>
+<script>if(location.protocol==='file:'){var s=document.createElement('script');s.src='http://127.0.0.1:8765/api/ping.js';s.onload=function(){location.replace('http://127.0.0.1:8765/'+'duofang/'+location.pathname.split('/').slice(-2).join('/'))};document.head.appendChild(s);}</script>
+</head>
+<body>
+
+<!-- ── 頁頂：標題 + Tab 切換 ── -->
+<div class="page-top">
+  <h1>📊 多方選股 v1 + 即時監控</h1>
+  <div class="tab-btns">
+    <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
+    <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
+  </div>
+  <span style="color:#8b949e;font-size:12px;">盤前開啟自動帶入 A/B 級個股並即時更新</span>
+</div>
+
+<!-- ══════════ Tab 1：即時監控 ══════════ -->
+<div id="tab-monitor" class="tab-panel">
+  <div class="mon-header">
+    <span style="color:#8b949e;font-size:12px;">載入等級：</span>
+    <button class="grade-filter on" data-g="A"   onclick="toggleGrade(this)">A</button>
+    <button class="grade-filter on" data-g="B"   onclick="toggleGrade(this)">B</button>
+    <button class="grade-filter"    data-g="C"   onclick="toggleGrade(this)">C</button>
+    <button class="grade-filter"    data-g="觀察" onclick="toggleGrade(this)">觀察</button>
+    <button onclick="reloadWatchlist()" style="margin-left:4px;">🔄 重新載入</button>
+    <button class="primary" id="autoBtn" onclick="toggleAuto()">▶️ 啟動自動更新</button>
+    <button onclick="refreshAll()">🔁 立即更新</button>
+    <select id="intSelect" onchange="changeRefreshSec(+this.value)"
+      style="background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px 8px;font-size:12px;">
+      <option value="5">5秒</option><option value="10" selected>10秒</option>
+      <option value="15">15秒</option><option value="30">30秒</option>
+    </select>
+    <span style="color:#8b949e;font-size:12px;" id="lastUpdate"></span>
+    <span style="color:#8b949e;font-size:12px;">資料日 2026/11/05 ｜ 產出 2026-11-05 18:25 ｜ 掃描 1959/1993 檔</span>
+  </div>
+  <div class="mon-stats">
+    <span>監控: <strong id="stCount">0</strong></span>
+    <span>A級訊號: <strong id="stA" class="up">0</strong></span>
+    <span>B級訊號: <strong id="stB" style="color:#d29922">0</strong></span>
+    <span>上漲: <strong id="stUp" class="up">0</strong></span>
+    <span>下跌: <strong id="stDown" class="down">0</strong></span>
+  </div>
+  <div class="mon-wrap">
+  <table class="mon-tbl">
+    <thead><tr>
+      <th class="lft" data-k="id">代號</th>
+      <th class="lft" data-k="name">名稱</th>
+      <th data-k="screenGrade">選股等級</th>
+      <th data-k="screenScore">選股分</th>
+      <th data-k="market">市場</th>
+      <th data-k="price">現價</th>
+      <th data-k="chgPct">漲跌%</th>
+      <th data-k="volK">量(張)</th>
+      <th data-k="turnover">換手率</th>
+      <th data-k="vr">量比</th>
+      <th data-k="vwapGap">距VWAP</th>
+      <th data-k="dayHighGap">距日高</th>
+      <th data-k="score">盤中分</th>
+      <th data-k="grade">盤中評級</th>
+      <th>訊號</th>
+    </tr></thead>
+    <tbody id="mon-tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ══════════ Tab 2：選股結果 ══════════ -->
+<div id="tab-screen" class="tab-panel">
+  <div style="padding:20px 16px 0">
+  <div class="meta">
+    已上穿 = 近5日 MA17 上穿 MA95、成交量≥1000張、收盤距 MA17 上下 5% 內｜
+    低檔起漲 = 站上雙均線、MA17 上彎、突破前20日高、漲≥5%、收盤在高低區間70%以上、量≥前20日均量3倍且≥300張、距 MA17 ≤13%｜
+    核心分（max 12）= 多頭排列×3 + MA17上彎×1 + MA95×1 + CCI×2 + CCI金叉×2 + MACD×2 + 量能×1｜
+    位置分 = 距MA17真正加減分（甜蜜區+2 ～ 過熱-3）｜
+    風險扣分 = 量能差/過熱（最多-2）｜
+    換手率% = 當日成交股數 ÷ 流通股數 × 100（&gt;10% 紅字＝異常熱絡）｜
+    <strong style="color:#58a6ff">點名稱開玩股網技術分析</strong>
+  </div>
+  <div class="stat-bar">
+    <div class="stat"><div class="val">5</div>入選總數</div>
+    <div class="stat"><div class="val" style="color:#16a34a">2</div>A 級</div>
+    <div class="stat"><div class="val" style="color:#2563eb">1</div>B 級</div>
+    <div class="stat"><div class="val" style="color:#d97706">0</div>C 級</div>
+    <div class="stat"><div class="val" style="color:#6b7280">2</div>觀察</div>
+  </div>
+  <div class="search-bar">
+    <input id="search" type="text" placeholder="🔍 搜尋名稱 / 代號 / 產業…" oninput="filterTable()">
+  </div>
+  </div>
+  <div class="tbl-wrap" style="padding:0 16px 20px">
+  <table id="main-table">
+  <thead><tr><th onclick="sortTable(this)">訊號類型<span class="arrow">⇅</span></th><th onclick="sortTable(this)">等級<span class="arrow">⇅</span></th><th onclick="sortTable(this)">總分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">核心分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">觸發分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險扣分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">代號<span class="arrow">⇅</span></th><th onclick="sortTable(this)">名稱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">市場<span class="arrow">⇅</span></th><th onclick="sortTable(this)">產業<span class="arrow">⇅</span></th><th onclick="sortTable(this)">資料日期<span class="arrow">⇅</span></th><th onclick="sortTable(this)">收盤價<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA95<span class="arrow">⇅</span></th><th onclick="sortTable(this)">距MA17%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置說明<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17-MA95距離%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">上穿距今(日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI區間<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DIF<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DEA<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MACD柱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">成交量(張)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">換手率%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比(5日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比狀態<span class="arrow">⇅</span></th><th onclick="sortTable(this)">訊號摘要<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險提醒<span class="arrow">⇅</span></th></tr></thead>
+  <tbody id="tbody">
+<tr class="row-b"><td>低檔起漲</td><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>12</td><td>10</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>1476</td><td><a href="https://www.wantgoo.com/stock/1476/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 儒鴻 技術分析">儒鴻</a></td><td>上市</td><td>紡織纖維</td><td>2026/11/05</td><td>339.5</td><td>320.82</td><td>316.99</td><td>+5.82%</td><td>距MA17中性</td><td>+1.21%</td><td>2</td><td>134.8</td><td>超買</td><td>6.517</td><td>6.0082</td><td>1.0175</td><td>5991</td><td>2.18%</td><td>6.58</td><td>🔥極度放量</td><td>低檔起漲、MA17上穿MA95(2日前)、多頭排列、MA17上彎、MA95走平上彎、CCI金叉、MACD金叉、5日均量大於20日均量、收盤接近高點、量比強(6.58)</td><td>-</td></tr>
+<tr class="row-a"><td>已上穿</td><td><span style="background:#16a34a;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">A</span></td><td>14</td><td>11</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>2453</td><td><a href="https://www.wantgoo.com/stock/2453/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 凌群 技術分析">凌群</a></td><td>上市</td><td>資訊服務業</td><td>2026/11/05</td><td>53.7</td><td>52.9</td><td>52.86</td><td>+1.51%</td><td>貼近MA17甜蜜區</td><td>+0.08%</td><td>0</td><td>300.7</td><td>超買</td><td>-0.0339</td><td>-0.0541</td><td>0.0404</td><td>3700</td><td>3.70%</td><td>8.84</td><td>🔥極度放量</td><td>MA17上穿MA95(0日前)、多頭排列、MA17上彎、CCI上穿0軸、CCI金叉、MACD金叉、5日均量大於20日均量、量比強(8.84)</td><td>-</td></tr>
+<tr class="row-a"><td>已上穿</td><td><span style="background:#16a34a;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">A</span></td><td>14</td><td>11</td><td>2</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>1477</td><td><a href="https://www.wantgoo.com/stock/1477/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 聚陽 技術分析">聚陽</a></td><td>上市</td><td>紡織纖維</td><td>2026/11/05</td><td>214.5</td><td>207.35</td><td>205.87</td><td>+3.45%</td><td>距MA17可接受</td><td>+0.72%</td><td>3</td><td>170.8</td><td>超買</td><td>2.2855</td><td>2.2947</td><td>-0.0183</td><td>4578</td><td>1.86%</td><td>4.77</td><td>🔥極度放量</td><td>MA17上穿MA95(3日前)、多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、CCI金叉、MACD柱放大、5日均量大於20日均量、收盤接近高點、量比強(4.77)</td><td>-</td></tr>
+<tr class="row-w"><td>已上穿</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>5</td><td>5</td><td>1</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#f87171;">-1</span></td><td>2204</td><td><a href="https://www.wantgoo.com/stock/2204/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 中華 技術分析">中華</a></td><td>上市</td><td>汽車工業</td><td>2026/11/05</td><td>52.4</td><td>52.74</td><td>52.64</td><td>-0.64%</td><td>低於MA17（5%內）</td><td>+0.19%</td><td>2</td><td>38.3</td><td>偏多</td><td>0.096</td><td>0.1172</td><td>-0.0423</td><td>1908</td><td>0.34%</td><td>2.88</td><td>📈大量放大</td><td>MA17上穿MA95(2日前)、多頭排列、MA17上彎、MA95走平上彎、量比強(2.88)</td><td>量能趨勢不佳</td></tr>
+<tr class="row-w"><td>已上穿</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>3</td><td>4</td><td>0</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#f87171;">-1</span></td><td>2912</td><td><a href="https://www.wantgoo.com/stock/2912/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 統一超 技術分析">統一超</a></td><td>上市</td><td>貿易百貨業</td><td>2026/11/05</td><td>214.5</td><td>222.5</td><td>220.8</td><td>-3.60%</td><td>低於MA17（5%內）</td><td>+0.77%</td><td>3</td><td>-59.4</td><td>中性</td><td>0.8858</td><td>1.7776</td><td>-1.7837</td><td>1755</td><td>0.17%</td><td>0.90</td><td>→正常</td><td>MA17上穿MA95(3日前)、多頭排列、MA17上彎</td><td>量能趨勢不佳</td></tr>
+
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  嵌入盤後選股資料（由 Python 產生）
+// ════════════════════════════════════════════════════
+const SCREEN_DATA = [{"id": "1476", "name": "儒鴻", "market": "tse", "grade": "B", "score": 12, "breakout": true, "close": 339.5, "volK": 5991, "vr5": 6.58, "shares": 274816514}, {"id": "2453", "name": "凌群", "market": "tse", "grade": "A", "score": 14, "breakout": false, "close": 53.7, "volK": 3700, "vr5": 8.84, "shares": 100000000}, {"id": "1477", "name": "聚陽", "market": "tse", "grade": "A", "score": 14, "breakout": false, "close": 214.5, "volK": 4578, "vr5": 4.77, "shares": 246129032}, {"id": "2204", "name": "中華", "market": "tse", "grade": "觀察", "score": 5, "breakout": false, "close": 52.4, "volK": 1908, "vr5": 2.88, "shares": 561176471}, {"id": "2912", "name": "統一超", "market": "tse", "grade": "觀察", "score": 3, "breakout": false, "close": 214.5, "volK": 1755, "vr5": 0.9, "shares": 1032352941}];
+
+// ════════════════════════════════════════════════════
+//  Tab 切換
+// ════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name));
+  // 切到監控頁時若尚未啟動，自動開始
+  if (name === 'monitor' && !autoTimer) { startAuto(); }
+}
+
+// ════════════════════════════════════════════════════
+//  選股結果 Table JS
+// ════════════════════════════════════════════════════
+function sortTable(th) {
+  const table = document.getElementById('main-table');
+  const tbody = table.querySelector('tbody');
+  const ths   = Array.from(table.querySelectorAll('thead th'));
+  const col   = ths.indexOf(th);
+  const asc   = th.dataset.asc !== 'true';
+  th.dataset.asc = asc;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const av = a.cells[col].innerText.trim();
+    const bv = b.cells[col].innerText.trim();
+    const an = parseFloat(av), bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+    return asc ? av.localeCompare(bv, 'zh-TW') : bv.localeCompare(av, 'zh-TW');
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(tr => {
+    tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  即時監控 JS
+// ════════════════════════════════════════════════════
+const CORS_PROXIES = [
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(url),
+  url => 'https://cors.eu.org/' + url,
+];
+
+let lastSources = null;
+let lastQuoteErr = '';
+let REFRESH_SEC = 10;
+let autoTimer   = null;
+let sortKey     = 'score';
+let sortAsc     = false;
+let lastData    = {};
+let lastSuccessTime = {};
+let histCache   = {};
+let sharesCache = {};
+
+// 從 SCREEN_DATA 預先填充 sharesCache
+SCREEN_DATA.forEach(s => { if (s.shares) sharesCache[s.id] = s.shares; });
+
+const sharesFailed = new Set();
+const histFailed   = new Set();
+
+// 等級過濾狀態
+let activeGrades = new Set(['A', 'B']);
+
+let watchlist = buildWatchlist();
+
+function buildWatchlist() {
+  return SCREEN_DATA.filter(s => s.breakout || activeGrades.has(s.grade))
+    .map(s => ({ id: s.id, name: s.name, market: s.market,
+                 screenGrade: s.grade, screenScore: s.score }));
+}
+
+function reloadWatchlist() {
+  watchlist = buildWatchlist();
+  lastData  = {};
+  lastSuccessTime = {};
+  renderMon();
+  refreshAll();
+  toast('已重新載入 ' + watchlist.length + ' 檔個股');
+}
+
+function toggleGrade(btn) {
+  const g = btn.dataset.g;
+  if (activeGrades.has(g)) { activeGrades.delete(g); btn.classList.remove('on'); }
+  else { activeGrades.add(g); btn.classList.add('on'); }
+}
+
+function normalizeMarket(m) {
+  if (!m) return 'tse';
+  const s = String(m).toLowerCase();
+  if (s === 'otc' || s === 'tse') return s;
+  if (/otc|tpex|上櫃|櫃買/.test(m)) return 'otc';
+  return 'tse';
+}
+
+// ── 先取得 TWSE MIS session cookie，再呼叫報價 API ──
+let _misCookieReady = false;
+async function ensureMisCookie() {
+  if (_misCookieReady) return;
+  try {
+    await fetch('https://mis.twse.com.tw/stock/index.jsp', {
+      credentials: 'include', mode: 'no-cors'
+    });
+    _misCookieReady = true;
+  } catch(e) {}
+}
+
+// ── fetch with 5s timeout，先直接打，失敗才試 CORS proxy ──
+async function fetchJsonWithProxy(url) {
+  async function ft(u, ms=6000, opts={}) {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const r = await fetch(u, { signal: ctrl.signal, ...opts });
+      clearTimeout(tid);
+      if (r.ok) return await r.json();
+      return null;
+    } catch(e) { clearTimeout(tid); return null; }
+  }
+  // 先帶 cookie 直接試
+  await ensureMisCookie();
+  const direct = await ft(url, 6000, { credentials: 'include' });
+  if (direct) return direct;
+  // 再試不帶 cookie
+  const direct2 = await ft(url);
+  if (direct2) return direct2;
+  // 最後試 CORS proxy
+  for (const px of CORS_PROXIES) {
+    const res = await ft(px(url));
+    if (res) return res;
+  }
+  throw new Error('所有來源都失敗');
+}
+
+
+async function fetchMisBatch(stocks) {
+  if (!stocks || stocks.length === 0) return {};
+
+  const result = {};
+  const CHUNK = 50;
+
+  for (let i = 0; i < stocks.length; i += CHUNK) {
+    const batch = stocks.slice(i, i + CHUNK);
+    const specs = batch.map(s =>
+      s.id + ':' + normalizeMarket(s.market)
+    ).join(',');
+
+    try {
+      const url = 'http:' + '//127.0.0.1:8765/api/quotes?stocks='
+                + encodeURIComponent(specs);
+
+      const response = await fetch(url, {
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        throw new Error('本機報價服務 HTTP ' + response.status);
+      }
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        throw new Error(data.error || '本機報價失敗');
+      }
+
+      (data.msgArray || []).forEach(q => {
+        if (q && q.c) result[q.c] = q;
+      });
+      lastSources = data.sources || lastSources;
+      lastQuoteErr = '';
+
+    } catch (e) {
+      console.warn('本機報價失敗：', e.message);
+      lastQuoteErr = location.protocol === 'https:'
+        ? '公開網頁沒有即時報價，顯示選股日收盤；即時報價請開本機 127.0.0.1:8765'
+        : '⚠️ 本機報價服務未回應，顯示選股日收盤';
+    }
+  }
+
+  return result;
+}
+
+async function fetchFinMindHist(id) {
+  try {
+    const url = 'http:' + '//127.0.0.1:8765/api/history?id='
+              + encodeURIComponent(id);
+
+    const response = await fetch(url, {
+      cache: 'no-store'
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    if (!data.ok) return null;
+
+    return {
+      avgVol20: data.avgVol20
+    };
+
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchOne(id, preQ) {
+  const s = watchlist.find(x => x.id === id);
+  if (!s) return;
+  try {
+    let q = preQ || null;
+    if (!q) throw new Error('即時報價暫不可用');
+
+    // q.z = 成交價（盤中），可能為 "-" 表示尚未成交；q.pz = 昨收
+    const price = parseFloat(q.z) > 0 ? parseFloat(q.z)
+                : parseFloat(q.pz) > 0 ? parseFloat(q.pz) : 0;
+    // 若取不到有效價格（0 或負值），保留舊資料而非顯示錯誤數字
+    if (price <= 0) throw new Error('尚無成交價，保留舊資料');
+
+    const prev  = parseFloat(q.y) || parseFloat(q.pz) || price;
+    const high  = parseFloat(q.h) > 0 ? parseFloat(q.h) : price;
+    const low   = parseFloat(q.l) > 0 ? parseFloat(q.l) : price;
+    const vol   = parseInt(q.v)   || 0;
+    const chgPct = prev > 0 ? ((price - prev) / prev) * 100 : 0;
+    const vwap   = (high + low + price) / 3;
+    const vwapGap   = vwap > 0 ? ((price - vwap) / vwap) * 100 : 0;
+    const dayHighGap = high > 0 ? ((price - high) / high) * 100 : 0;
+
+    // 量比
+    let vr = null;
+    const today = new Date().toISOString().slice(0, 10);
+    let hist = histCache[id];
+    if (!hist) {
+      try { const c = localStorage.getItem('hist_' + id + '_' + today); if (c) hist = JSON.parse(c); } catch(e) {}
+    }
+    if (!hist && !histFailed.has(id)) {
+      hist = await fetchFinMindHist(id);
+      if (hist) {
+        histCache[id] = hist;
+        try { localStorage.setItem('hist_' + id + '_' + today, JSON.stringify(hist)); } catch(e) {}
+      } else { histFailed.add(id); }
+    }
+    if (hist && hist.avgVol20 > 0) vr = vol / hist.avgVol20;
+
+    // 換手率
+    let turnover = null;
+    const shares = sharesCache[id];
+    if (shares && shares > 0 && vol > 0) turnover = (vol * 1000 / shares) * 100;
+
+    const { score, grade, signals } = scoreIntraday(chgPct, vr, vwapGap, dayHighGap);
+    lastData[id] = { price, chgPct, volK: vol, vr, turnover, vwapGap, dayHighGap, score, grade, signals, _stale: !!q._stale, _errMsg: q._stale ? '報價暫未更新' : '' };
+    lastSuccessTime[id] = Date.now();
+    if (q.n) s.name = q.n;
+  } catch(e) {
+    if (lastData[id] && lastData[id].price != null) {
+      lastData[id] = { ...lastData[id], _stale: true, _errMsg: e.message };
+    } else if (s.close > 0) {
+      // 沒有即時報價時，顯示報表內的選股日資料並明確標示，不留空白
+      lastData[id] = { price: s.close, volK: s.volK != null ? s.volK : null, vr: s.vr5 != null ? s.vr5 : null,
+                       signals: '選股日收盤（非即時）', _stale: true, _errMsg: '選股日收盤（非即時）' };
+    } else {
+      lastData[id] = { _stale: true, _errMsg: e.message };
+    }
+  }
+}
+
+function scoreIntraday(chgPct, vr, vwapGap, dayHighGap) {
+  let score = 0; const signals = [];
+  if (chgPct >= 2 && chgPct <= 7) { score += 3; signals.push('漲2-7%'); }
+  else if (chgPct > 7) { score += 1; signals.push('⚠️過熱'); }
+  else if (chgPct >= 1) { score += 1; }
+  if (vr != null) {
+    if (vr >= 2) { score += 3; signals.push('爆量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1.5) { score += 2; signals.push('放量' + vr.toFixed(1) + 'x'); }
+    else if (vr >= 1)  { score += 1; }
+  }
+  if (vwapGap >= 0)  { score += 2; signals.push('站上VWAP'); } else { score -= 1; }
+  if (dayHighGap >= -0.5) { score += 2; signals.push('貼近日高'); }
+  else if (dayHighGap >= -1.5) { score += 1; }
+  let grade = '—';
+  if (score >= 8) grade = 'A'; else if (score >= 5) grade = 'B'; else if (score >= 3) grade = 'C';
+  return { score, grade, signals: signals.join('、') };
+}
+
+function renderMon() {
+  const tb = document.getElementById('mon-tbody');
+  const rows = watchlist.map(s => ({ ...s, ...(lastData[s.id] || {}) }));
+  rows.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (va == null) va = sortAsc ? Infinity : -Infinity;
+    if (vb == null) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+  tb.innerHTML = rows.map(r => {
+    const price   = r.price    != null ? r.price.toFixed(2)    : '—';
+    const chgPct  = r.chgPct   != null ? (r.chgPct >= 0 ? '+' : '') + r.chgPct.toFixed(2) + '%' : '—';
+    const chgCls  = r.chgPct > 0 ? 'up' : r.chgPct < 0 ? 'down' : 'flat';
+    const volK    = r.volK     != null ? r.volK.toLocaleString() : '—';
+    const vr      = r.vr       != null ? r.vr.toFixed(2)        : '—';
+    const vwapGap = r.vwapGap  != null ? (r.vwapGap >= 0 ? '+' : '') + r.vwapGap.toFixed(2) + '%' : '—';
+    const dhGap   = r.dayHighGap != null ? r.dayHighGap.toFixed(2) + '%' : '—';
+    const scoreTxt = r.score != null ? r.score : '—';
+    let   toHtml  = '—';
+    if (r.turnover != null) {
+      const t = r.turnover;
+      const style = t >= 10 ? 'color:#f85149;font-weight:bold' : t >= 5 ? 'color:#d29922' : 'color:#e6edf3';
+      toHtml = '<span style="' + style + '">' + t.toFixed(2) + '%</span>';
+    }
+    let gradeHtml = '—';
+    if (r.grade === 'A') gradeHtml = '<span class="score-a">A</span>';
+    else if (r.grade === 'B') gradeHtml = '<span class="score-b">B</span>';
+    else if (r.grade === 'C') gradeHtml = '<span class="score-c">C</span>';
+
+    let sgHtml = '—';
+    if (r.screenGrade === 'A') sgHtml = '<span class="score-a">A</span>';
+    else if (r.screenGrade === 'B') sgHtml = '<span class="score-b">B</span>';
+    else if (r.screenGrade === 'C') sgHtml = '<span class="score-c">C</span>';
+    else if (r.screenGrade) sgHtml = '<span class="score-c">' + r.screenGrade + '</span>';
+
+    const mkt = normalizeMarket(r.market);
+    const mktTag = '<span class="badge tag-' + mkt + '">' + (mkt === 'otc' ? '上櫃' : '上市') + '</span>';
+
+    const lastOk = lastSuccessTime[r.id];
+    let freshHtml = ''; let rowStyle = '';
+    if (lastOk) {
+      const ageSec = Math.floor((Date.now() - lastOk) / 1000);
+      if (r._stale) {
+        const ageStr = ageSec < 60 ? ageSec + 's前' : Math.floor(ageSec/60) + 'm前';
+        freshHtml = '<span title="最後成功：' + new Date(lastOk).toLocaleTimeString('zh-TW') + '\n錯誤：' + (r._errMsg||'') + '" style="color:#d29922;font-size:10px;margin-left:4px">⚠️' + ageStr + '</span>';
+        rowStyle = 'opacity:0.75';
+      } else {
+        freshHtml = '<span style="color:#3fb950;font-size:10px;margin-left:3px">' + new Date(lastOk).toLocaleTimeString('zh-TW') + '</span>';
+      }
+    } else if (r._stale) {
+      freshHtml = '<span style="color:#f85149;font-size:11px">❌' + (r._errMsg||'無資料') + '</span>';
+    }
+    const signalTxt = (!r._stale && r.signals) ? r.signals : (r._stale && r.price != null ? (r.signals || '—') : '—');
+
+    return '<tr style="' + rowStyle + '">' +
+      '<td class="lft">' + r.id + '</td>' +
+      '<td class="name-cell" onclick="openChart(' + r.id + ')">' + r.name + freshHtml + '</td>' +
+      '<td>' + sgHtml + '</td>' +
+      '<td>' + (r.screenScore || '—') + '</td>' +
+      '<td>' + mktTag + '</td>' +
+      '<td class="' + chgCls + '">' + price + '</td>' +
+      '<td class="' + chgCls + '">' + chgPct + '</td>' +
+      '<td>' + volK + '</td>' +
+      '<td>' + toHtml + '</td>' +
+      '<td>' + vr + '</td>' +
+      '<td class="' + (r.vwapGap >= 0 ? 'up' : 'down') + '">' + vwapGap + '</td>' +
+      '<td>' + dhGap + '</td>' +
+      '<td><strong>' + scoreTxt + '</strong></td>' +
+      '<td>' + gradeHtml + '</td>' +
+      '<td class="small">' + signalTxt + '</td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('stCount').textContent = rows.length;
+  document.getElementById('stA').textContent  = rows.filter(r => r.grade === 'A').length;
+  document.getElementById('stB').textContent  = rows.filter(r => r.grade === 'B').length;
+  document.getElementById('stUp').textContent = rows.filter(r => r.chgPct > 0).length;
+  document.getElementById('stDown').textContent = rows.filter(r => r.chgPct < 0).length;
+}
+
+document.querySelectorAll('.mon-tbl th[data-k]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = false; }
+    renderMon();
+  });
+});
+
+function openChart(id) { window.open('https://www.wantgoo.com/stock/' + id + '/technical-chart', '_blank'); }
+
+async function refreshAll() {
+  if (watchlist.length === 0) { renderMon(); return; }
+  const quotes = await fetchMisBatch(watchlist);
+  const BATCH = 20;
+  for (let i = 0; i < watchlist.length; i += BATCH) {
+    const sl = watchlist.slice(i, i + BATCH);
+    await Promise.all(sl.map(s => fetchOne(s.id, quotes[s.id])));
+    // 只在最後一批完成後才重新排序+渲染，避免中途資料不全造成畫面跳動
+    if (i + BATCH >= watchlist.length) renderMon();
+  }
+  const src = lastSources || {};
+  const names = [src.mis ? 'MIS ' + src.mis : '', src.yahoo ? 'Yahoo ' + src.yahoo : '', src.cache ? '暫存 ' + src.cache : ''].filter(Boolean).join('、');
+  document.getElementById('lastUpdate').textContent = lastQuoteErr ||
+    ('報價 ' + new Date().toLocaleTimeString('zh-TW') + (names ? '（' + names + ' 檔）' : ''));
+}
+
+function startAuto() {
+  if (autoTimer) return;
+  refreshAll();
+  autoTimer = setInterval(refreshAll, REFRESH_SEC * 1000);
+  document.getElementById('autoBtn').textContent = '⏸ 停止自動更新';
+}
+function toggleAuto() {
+  if (autoTimer) {
+    clearInterval(autoTimer); autoTimer = null;
+    document.getElementById('autoBtn').textContent = '▶️ 啟動自動更新';
+  } else { startAuto(); }
+}
+function changeRefreshSec(sec) {
+  REFRESH_SEC = sec;
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = setInterval(refreshAll, REFRESH_SEC * 1000); }
+}
+
+function toast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── 頁面載入：預設開選股結果 Tab（盤後立即可看）
+// 開啟報告就進「即時監控」並自動更新（switchTab 內已處理）
+switchTab('monitor');
+</script>
+</body>
+</html>
