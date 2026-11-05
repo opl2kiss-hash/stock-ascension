@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>台股昇天 盤中監控 2026/10/29</title>
+<title>台股昇天 盤中監控 2026/11/05</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -81,11 +81,12 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 .disc{padding:5px 14px;border-top:1px solid rgba(239,68,68,.12);
   font-size:10px;color:var(--muted);position:sticky;bottom:0;background:var(--bg);}
 </style>
+<script>if(location.protocol==='file:'){var s=document.createElement('script');s.src='http://127.0.0.1:8765/api/ping.js';s.onload=function(){location.replace('http://127.0.0.1:8765/'+(location.pathname.includes('/date/')?'date/':'')+location.pathname.split('/').pop())};document.head.appendChild(s);}</script>
 </head>
 <body>
 
 <div class="top">
-  <div class="brand">📊 台股昇天 盤中監控<small>v2.0 ｜ 2026/10/29 ｜ 選股日 2026-10-29</small></div>
+  <div class="brand">📊 台股昇天 盤中監控<small>v1 ｜ 2026/11/05 ｜ 選股日 2026-11-05</small></div>
   <div class="ctrls">
     <select class="sel" id="intSel" onchange="setInt(+this.value)">
       <option value="10" selected>10秒</option>
@@ -100,7 +101,7 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 </div>
 
 <div class="sum-bar">
-  <div class="chip"><span class="lbl">監控</span><span class="v blue" id="st-cnt">5</span></div>
+  <div class="chip"><span class="lbl">監控</span><span class="v blue" id="st-cnt">13</span></div>
   <div class="chip"><span class="lbl">盤中A</span><span class="v up"   id="st-a">0</span></div>
   <div class="chip"><span class="lbl">盤中B</span><span class="v warn" id="st-b">0</span></div>
   <div class="chip"><span class="lbl">上漲</span><span class="v up"   id="st-up">0</span></div>
@@ -111,8 +112,8 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 </div>
 
 <div class="info-bar">
-  <span>📋 選股結果來自 V1 stock-ascension.py ｜ 共 5 支</span>
-  <span>頭肩底突破頸線:5</span>
+  <span>📋 選股結果來自 股票選股_v1.py ｜ 共 13 支 ｜ 資料日 2026-11-05 ｜ 產出 2026-11-05 17:58 ｜ 掃描 1990/2041 檔</span>
+  <span>頭肩底突破頸線:8　W底突破頸線:4　底部放量突破:2</span>
   <span style="color:#f43f5e;margin-left:auto">⚠️ 僅供技術分析參考，不構成投資建議</span>
 </div>
 
@@ -145,17 +146,25 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 </table>
 </div>
 
-<div class="disc">⚠️ 即時報價來自 TWSE MIS，延遲約 5~15 秒。本頁以 file:// 開啟，可直接存取 TWSE MIS。</div>
+<div class="disc" id="srcNote">⚠️ 報價優先來自 TWSE MIS，連線受阻時自動改用 Yahoo Finance；來源與報價時間顯示在頁首。</div>
 <div class="toast" id="toast"></div>
 
 <script>
 // ── 選股資料 ────────────────────────────────
 const WATCHLIST = [
-  {id:"6191",name:"精成科",market:"上櫃",pattern:"頭肩底突破頸線",vr:1.19,neckline:"81.85",screenPrice:84.3,avgVol:4538,industry:"",scanDate:"2026-10-29",ma17:89.8,ma17Sum16:1441.9},
-  {id:"6277",name:"宏正",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.86,neckline:"77.4",screenPrice:93.1,avgVol:1292,industry:"",scanDate:"2026-10-29",ma17:86.8824,ma17Sum16:1399.9},
-  {id:"9910",name:"豐泰",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.73,neckline:"68.25",screenPrice:69.7,avgVol:1568,industry:"",scanDate:"2026-10-29",ma17:68.1412,ma17Sum16:1090.6},
-  {id:"4976",name:"佳凌",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.59,neckline:"35.38",screenPrice:36.25,avgVol:3885,industry:"",scanDate:"2026-10-29",ma17:38.4206,ma17Sum16:616.85},
-  {id:"6197",name:"佳必琪",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.43,neckline:"306.0",screenPrice:318.5,avgVol:2752,industry:"",scanDate:"2026-10-29",ma17:346.5882,ma17Sum16:5552.5}
+  {id:"2501",name:"國建",market:"上市",pattern:"W底突破頸線",vr:3.75,neckline:"20.35",screenPrice:21.05,screenChg:4.47,avgVol:1805,industry:"建材營造",scanDate:"2026-11-05",ma17:20.3618,ma17Sum16:325.65},
+  {id:"3691",name:"碩禾",market:"上櫃",pattern:"W底突破頸線",vr:2.03,neckline:"121.5",screenPrice:139.0,screenChg:-5.44,avgVol:1662,industry:"光電業",scanDate:"2026-11-05",ma17:117.1876,ma17Sum16:1888.19},
+  {id:"3354",name:"律勝",market:"上櫃",pattern:"W底突破頸線",vr:1.45,neckline:"30.5",screenPrice:39.5,screenChg:-1.25,avgVol:3757,industry:"電子零組件業",scanDate:"2026-11-05",ma17:44.2618,ma17Sum16:721.1},
+  {id:"1476",name:"儒鴻",market:"上市",pattern:"底部放量突破",vr:3.56,neckline:"331.0",screenPrice:339.5,screenChg:8.64,avgVol:1682,industry:"紡織纖維",scanDate:"2026-11-05",ma17:320.8235,ma17Sum16:5142.0},
+  {id:"2610",name:"華航",market:"上市",pattern:"底部放量突破 / W底突破頸線",vr:5.19,neckline:"21.2",screenPrice:21.65,screenChg:5.61,avgVol:17393,industry:"航運業",scanDate:"2026-11-05",ma17:20.5618,ma17Sum16:329.15},
+  {id:"6697",name:"東捷資訊",market:"上櫃",pattern:"頭肩底突破頸線",vr:5.63,neckline:"40.55",screenPrice:57.0,screenChg:-9.95,avgVol:1204,industry:"資訊服務業",scanDate:"2026-11-05",ma17:48.1471,ma17Sum16:777.7},
+  {id:"1477",name:"聚陽",market:"上市",pattern:"頭肩底突破頸線",vr:3.51,neckline:"198.75",screenPrice:214.5,screenChg:5.41,avgVol:1306,industry:"紡織纖維",scanDate:"2026-11-05",ma17:207.3529,ma17Sum16:3319.5},
+  {id:"6756",name:"威鋒電子",market:"上市",pattern:"頭肩底突破頸線",vr:0.81,neckline:"95.45",screenPrice:108.0,screenChg:-9.62,avgVol:1525,industry:"半導體業",scanDate:"2026-11-05",ma17:117.1059,ma17Sum16:1894.7},
+  {id:"8111",name:"立碁",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.78,neckline:"70.85",screenPrice:74.0,screenChg:-3.9,avgVol:10228,industry:"光電業",scanDate:"2026-11-05",ma17:78.9294,ma17Sum16:1257.4},
+  {id:"8089",name:"康全電訊",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.73,neckline:"17.75",screenPrice:25.3,screenChg:-5.24,avgVol:2075,industry:"通信網路業",scanDate:"2026-11-05",ma17:25.0529,ma17Sum16:405.1},
+  {id:"6127",name:"九豪",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.55,neckline:"47.32",screenPrice:48.75,screenChg:-1.81,avgVol:9914,industry:"電子零組件業",scanDate:"2026-11-05",ma17:56.7412,ma17Sum16:900.6},
+  {id:"4938",name:"和碩",market:"上市",pattern:"頭肩底突破頸線",vr:0.5,neckline:"88.6",screenPrice:97.2,screenChg:-4.24,avgVol:18341,industry:"電腦及週邊設備業",scanDate:"2026-11-05",ma17:102.3176,ma17Sum16:1640.8},
+  {id:"6277",name:"宏正",market:"上市",pattern:"頭肩底突破頸線",vr:0.47,neckline:"77.4",screenPrice:80.7,screenChg:-5.39,avgVol:1454,industry:"電腦及週邊設備業",scanDate:"2026-11-05",ma17:89.2176,ma17Sum16:1435.4}
 ];
 const FM_TOKEN  = "";
 
@@ -167,6 +176,8 @@ let histCache  = {};
 let histFailed = new Set();
 let autoTimer  = null;
 let refreshing = false;
+let lastSources = null;
+let lastQuoteTs = '';
 let REFRESH_SEC = 10;
 let sortKey    = 'score';
 let sortAsc    = false;
@@ -202,7 +213,7 @@ function showToast(msg) {
   setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// ══ CORS 多重備援（完整複製自 V6.1）═════════
+// ══ CORS 多重備援（完整複製自 多方選股）═════════
 const CORS_PROXIES = [
   url => 'https://corsproxy.io/?' + encodeURIComponent(url),
   url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
@@ -259,10 +270,12 @@ async function fetchMisBatch(stocks) {
       const j=await r.json();
       if(!r.ok || !j.ok) throw new Error(j.error||'HTTP '+r.status);
       (j.msgArray||[]).forEach(q=>{if(q && q.c) result[q.c]=q;});
+      lastSources = j.sources || lastSources;
+      lastQuoteTs = j.ts || lastQuoteTs;
     } catch(e) {
       console.error('本機報價橋接失敗',e);
       const el=document.getElementById('lastUpd');
-      if(el) {el.textContent='⚠️ 報價服務失敗：請先雙擊「啟動即時報價.command」'; el.style.color='#f85149';}
+      if(el) el.textContent = location.protocol==='https:' ? '公開網頁沒有即時報價，顯示選股日收盤；即時報價請開本機 127.0.0.1:8765' : '⚠️ 本機報價服務未回應，顯示選股日收盤';
     } finally {clearTimeout(timer);}
   }
   return result;
@@ -322,12 +335,7 @@ async function fetchOne(id, rawQ) {
   try {
     let q = rawQ || null;
     if (!q) {
-      throw new Error("本機報價無資料或服務未啟動");
-      const ex  = normMkt(s.market);
-      const url = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch='
-                + ex + '_' + id + '.tw&json=1&_=' + Date.now();
-      const j = await fetchJsonWithProxy(url);
-      if (j && j.msgArray && j.msgArray[0]) q = j.msgArray[0];
+      throw new Error("即時報價暫不可用");
     }
     if (!q) throw new Error('無即時報價');
 
@@ -353,7 +361,7 @@ async function fetchOne(id, rawQ) {
     }
     if (hist && hist.avgVol20 > 0) vr = vol / hist.avgVol20;
     // 前16根已完成日K + 即時價格：隔日盤中 MA17 正確計算。
-    // 先用 V1 掃描當天的完整17日資料，避免 FinMind/CORS 失敗顯示空白。
+    // 先用 股票選股 掃描當天的完整17日資料，避免 FinMind/CORS 失敗顯示空白。
     if (s.ma17Sum16 > 0) {
       // 選股當日的 MA17 靜態值為可靠備援；隔日的滑動 MA17 需更新歷史窗口。
       if (hist && hist.ma17Base > 0) s.ma17 = (hist.ma17Base + price) / 17;
@@ -371,7 +379,7 @@ async function fetchOne(id, rawQ) {
       else if (price < prev_) { row.classList.add('fl-d'); setTimeout(() => row.classList.remove('fl-d'), 700); }
     }
 
-    lastData[id] = { price, chgPct, volK: vol, vr, vwapGap, dayHighGap, score, grade, signals, _stale: false };
+    lastData[id] = { price, chgPct, volK: vol, vr, vwapGap, dayHighGap, score, grade, signals, _stale: !!q._stale, _src: q._source||'', _errMsg: q._stale?'報價暫未更新':'' };
     lastSucc[id] = Date.now();
     if (q.n) s.name = q.n;
     if (q.ex === 'otc') s.market = '上櫃';
@@ -380,6 +388,9 @@ async function fetchOne(id, rawQ) {
   } catch(e) {
     if (lastData[id] && lastData[id].price)
       lastData[id] = { ...lastData[id], _stale: true, _errMsg: e.message };
+    else if (s.screenPrice > 0)
+      // 沒有即時報價時，顯示報表內的選股日資料，並在訊號欄標明，不留空白
+      lastData[id] = { price: s.screenPrice, chgPct: s.screenChg||0, volK: null, vr: s.vr||null, _stale: true, _errMsg: '選股日收盤（非即時）' };
     else
       lastData[id] = { _stale: true, _errMsg: e.message };
   }
@@ -396,7 +407,7 @@ function renderMon() {
     return sortAsc ? va - vb : vb - va;
   });
 
-  document.getElementById('mon-tbody').innerHTML = rows.map(r => {
+  document.getElementById('mon-tbody').innerHTML = !rows.length ? '<tr><td colspan="17" style="padding:28px;text-align:center;color:var(--muted)">本日掃描完成，沒有符合條件的個股</td></tr>' : rows.map(r => {
     const d = lastData[r.id] || {};
     const price   = d.price    != null ? d.price.toFixed(2)                              : '—';
     const chgPct  = d.chgPct   != null ? (d.chgPct  >= 0 ? '+' : '') + d.chgPct.toFixed(2) + '%' : '—';
@@ -506,7 +517,13 @@ async function refreshAll() {
       await Promise.all(watchlist.slice(i,i+CHUNK).map(s => fetchOne(s.id, batch[s.id]||null)));
       renderMon();
     }
-    document.getElementById('lastUpd').textContent = Object.keys(batch).length ? '收到報價：'+new Date().toLocaleTimeString('zh-TW') : '⚠️ 沒有收到報價，請確認本機服務';
+    const lu = document.getElementById('lastUpd');
+    if (!watchlist.length) lu.textContent = '今日無符合個股';
+    else if (Object.keys(batch).length) {
+      const src = lastSources||{};
+      const names = [src.mis?'MIS '+src.mis:'', src.yahoo?'Yahoo '+src.yahoo:'', src.cache?'暫存 '+src.cache:''].filter(Boolean).join('、');
+      lu.textContent = '報價 '+new Date().toLocaleTimeString('zh-TW')+(names?'（'+names+' 檔）':'');
+    } else if (!lu.textContent.includes('收盤')) lu.textContent = '⚠️ 暫無報價，顯示選股日收盤';
   } catch(e) {
     document.getElementById('lastUpd').textContent = '更新失敗：'+(e.message || e);
   } finally {
