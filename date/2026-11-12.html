@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>台股昇天 盤中監控 2026/11/05</title>
+<title>台股昇天 盤中監控 2026/11/12</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -86,7 +86,7 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 <body>
 
 <div class="top">
-  <div class="brand">📊 台股昇天 盤中監控<small>v1 ｜ 2026/11/05 ｜ 選股日 2026-11-05</small></div>
+  <div class="brand">📊 台股昇天 盤中監控<small>v1 ｜ 2026/11/12 ｜ 選股日 2026-11-12</small></div>
   <div class="ctrls">
     <select class="sel" id="intSel" onchange="setInt(+this.value)">
       <option value="10" selected>10秒</option>
@@ -101,7 +101,7 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 </div>
 
 <div class="sum-bar">
-  <div class="chip"><span class="lbl">監控</span><span class="v blue" id="st-cnt">13</span></div>
+  <div class="chip"><span class="lbl">監控</span><span class="v blue" id="st-cnt">14</span></div>
   <div class="chip"><span class="lbl">盤中A</span><span class="v up"   id="st-a">0</span></div>
   <div class="chip"><span class="lbl">盤中B</span><span class="v warn" id="st-b">0</span></div>
   <div class="chip"><span class="lbl">上漲</span><span class="v up"   id="st-up">0</span></div>
@@ -112,8 +112,8 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 </div>
 
 <div class="info-bar">
-  <span>📋 選股結果來自 股票選股_v1.py ｜ 共 13 支 ｜ 資料日 2026-11-05 ｜ 產出 2026-11-05 17:58 ｜ 掃描 1990/2041 檔</span>
-  <span>頭肩底突破頸線:8　W底突破頸線:4　底部放量突破:2</span>
+  <span>📋 選股結果來自 股票選股_v1.py ｜ 共 14 支 ｜ 資料日 2026-11-12 ｜ 產出 2026-11-12 17:56 ｜ 掃描 1989/2041 檔</span>
+  <span>底部放量突破:9　W底突破頸線:4　頭肩底突破頸線:2　旗形整理突破:1</span>
   <span style="color:#f43f5e;margin-left:auto">⚠️ 僅供技術分析參考，不構成投資建議</span>
 </div>
 
@@ -152,19 +152,20 @@ select.sel{background:var(--bg3);color:var(--text);border:1px solid var(--border
 <script>
 // ── 選股資料 ────────────────────────────────
 const WATCHLIST = [
-  {id:"2501",name:"國建",market:"上市",pattern:"W底突破頸線",vr:3.75,neckline:"20.35",screenPrice:21.05,screenChg:4.47,avgVol:1805,industry:"建材營造",scanDate:"2026-11-05",ma17:20.3618,ma17Sum16:325.65},
-  {id:"3691",name:"碩禾",market:"上櫃",pattern:"W底突破頸線",vr:2.03,neckline:"121.5",screenPrice:139.0,screenChg:-5.44,avgVol:1662,industry:"光電業",scanDate:"2026-11-05",ma17:117.1876,ma17Sum16:1888.19},
-  {id:"3354",name:"律勝",market:"上櫃",pattern:"W底突破頸線",vr:1.45,neckline:"30.5",screenPrice:39.5,screenChg:-1.25,avgVol:3757,industry:"電子零組件業",scanDate:"2026-11-05",ma17:44.2618,ma17Sum16:721.1},
-  {id:"1476",name:"儒鴻",market:"上市",pattern:"底部放量突破",vr:3.56,neckline:"331.0",screenPrice:339.5,screenChg:8.64,avgVol:1682,industry:"紡織纖維",scanDate:"2026-11-05",ma17:320.8235,ma17Sum16:5142.0},
-  {id:"2610",name:"華航",market:"上市",pattern:"底部放量突破 / W底突破頸線",vr:5.19,neckline:"21.2",screenPrice:21.65,screenChg:5.61,avgVol:17393,industry:"航運業",scanDate:"2026-11-05",ma17:20.5618,ma17Sum16:329.15},
-  {id:"6697",name:"東捷資訊",market:"上櫃",pattern:"頭肩底突破頸線",vr:5.63,neckline:"40.55",screenPrice:57.0,screenChg:-9.95,avgVol:1204,industry:"資訊服務業",scanDate:"2026-11-05",ma17:48.1471,ma17Sum16:777.7},
-  {id:"1477",name:"聚陽",market:"上市",pattern:"頭肩底突破頸線",vr:3.51,neckline:"198.75",screenPrice:214.5,screenChg:5.41,avgVol:1306,industry:"紡織纖維",scanDate:"2026-11-05",ma17:207.3529,ma17Sum16:3319.5},
-  {id:"6756",name:"威鋒電子",market:"上市",pattern:"頭肩底突破頸線",vr:0.81,neckline:"95.45",screenPrice:108.0,screenChg:-9.62,avgVol:1525,industry:"半導體業",scanDate:"2026-11-05",ma17:117.1059,ma17Sum16:1894.7},
-  {id:"8111",name:"立碁",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.78,neckline:"70.85",screenPrice:74.0,screenChg:-3.9,avgVol:10228,industry:"光電業",scanDate:"2026-11-05",ma17:78.9294,ma17Sum16:1257.4},
-  {id:"8089",name:"康全電訊",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.73,neckline:"17.75",screenPrice:25.3,screenChg:-5.24,avgVol:2075,industry:"通信網路業",scanDate:"2026-11-05",ma17:25.0529,ma17Sum16:405.1},
-  {id:"6127",name:"九豪",market:"上櫃",pattern:"頭肩底突破頸線",vr:0.55,neckline:"47.32",screenPrice:48.75,screenChg:-1.81,avgVol:9914,industry:"電子零組件業",scanDate:"2026-11-05",ma17:56.7412,ma17Sum16:900.6},
-  {id:"4938",name:"和碩",market:"上市",pattern:"頭肩底突破頸線",vr:0.5,neckline:"88.6",screenPrice:97.2,screenChg:-4.24,avgVol:18341,industry:"電腦及週邊設備業",scanDate:"2026-11-05",ma17:102.3176,ma17Sum16:1640.8},
-  {id:"6277",name:"宏正",market:"上市",pattern:"頭肩底突破頸線",vr:0.47,neckline:"77.4",screenPrice:80.7,screenChg:-5.39,avgVol:1454,industry:"電腦及週邊設備業",scanDate:"2026-11-05",ma17:89.2176,ma17Sum16:1435.4}
+  {id:"3691",name:"碩禾",market:"上櫃",pattern:"W底突破頸線",vr:6.11,neckline:"121.5",screenPrice:143.5,screenChg:5.9,avgVol:3240,industry:"光電業",scanDate:"2026-11-12",ma17:129.3994,ma17Sum16:2105.33},
+  {id:"6949",name:"沛爾生醫*-創",market:"上市",pattern:"W底突破頸線",vr:5.43,neckline:"40.85",screenPrice:40.95,screenChg:-8.49,avgVol:4371,industry:"生技醫療業",scanDate:"2026-11-12",ma17:39.5235,ma17Sum16:636.0},
+  {id:"2610",name:"華航",market:"上市",pattern:"W底突破頸線",vr:1.66,neckline:"21.05",screenPrice:22.8,screenChg:-2.98,avgVol:34453,industry:"航運業",scanDate:"2026-11-12",ma17:21.0853,ma17Sum16:337.9},
+  {id:"2471",name:"資通",market:"上市",pattern:"底部放量突破",vr:9.67,neckline:"59.8",screenPrice:64.7,screenChg:8.19,avgVol:1577,industry:"資訊服務業",scanDate:"2026-11-12",ma17:52.45,ma17Sum16:841.75},
+  {id:"6697",name:"東捷資訊",market:"上櫃",pattern:"底部放量突破",vr:4.26,neckline:"69.6",screenPrice:73.3,screenChg:7.01,avgVol:2398,industry:"資訊服務業",scanDate:"2026-11-12",ma17:54.6676,ma17Sum16:887.75},
+  {id:"4174",name:"浩鼎",market:"上櫃",pattern:"底部放量突破",vr:4.23,neckline:"60.5",screenPrice:64.9,screenChg:7.27,avgVol:1217,industry:"生技醫療業",scanDate:"2026-11-12",ma17:51.3376,ma17Sum16:820.74},
+  {id:"3701",name:"大眾控",market:"上市",pattern:"底部放量突破",vr:3.16,neckline:"69.4",screenPrice:69.5,screenChg:9.97,avgVol:6735,industry:"電腦及週邊設備業",scanDate:"2026-11-12",ma17:56.3,ma17Sum16:893.9},
+  {id:"2355",name:"敬鵬",market:"上市",pattern:"底部放量突破",vr:2.68,neckline:"56.3",screenPrice:60.7,screenChg:9.96,avgVol:14638,industry:"電子零組件業",scanDate:"2026-11-12",ma17:51.6618,ma17Sum16:825.35},
+  {id:"6425",name:"易發",market:"上櫃",pattern:"底部放量突破",vr:2.6,neckline:"84.8",screenPrice:85.4,screenChg:9.91,avgVol:1685,industry:"電機機械",scanDate:"2026-11-12",ma17:73.9235,ma17Sum16:1184.1},
+  {id:"1476",name:"儒鴻",market:"上市",pattern:"底部放量突破",vr:1.84,neckline:"360.0",screenPrice:369.0,screenChg:4.68,avgVol:2056,industry:"紡織纖維",scanDate:"2026-11-12",ma17:331.5,ma17Sum16:5314.5},
+  {id:"2548",name:"華固",market:"上市",pattern:"底部放量突破 / W底突破頸線",vr:1.67,neckline:"94.9",screenPrice:95.2,screenChg:0.74,avgVol:1236,industry:"建材營造",scanDate:"2026-11-12",ma17:92.1059,ma17Sum16:1473.9},
+  {id:"8099",name:"大世科",market:"上櫃",pattern:"底部放量突破 / 旗形整理突破",vr:1.9,neckline:"154.0",screenPrice:165.5,screenChg:9.97,avgVol:1529,industry:"資訊服務業",scanDate:"2026-11-12",ma17:115.5882,ma17Sum16:1899.0},
+  {id:"1477",name:"聚陽",market:"上市",pattern:"頭肩底突破頸線",vr:1.2,neckline:"198.75",screenPrice:215.5,screenChg:1.17,avgVol:1461,industry:"紡織纖維",scanDate:"2026-11-12",ma17:209.4706,ma17Sum16:3353.5},
+  {id:"4938",name:"和碩",market:"上市",pattern:"頭肩底突破頸線",vr:0.47,neckline:"88.6",screenPrice:92.2,screenChg:-4.16,avgVol:17556,industry:"電腦及週邊設備業",scanDate:"2026-11-12",ma17:100.6529,ma17Sum16:1609.1}
 ];
 const FM_TOKEN  = "";
 
