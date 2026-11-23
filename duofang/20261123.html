@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8">
-<title>多方選股 v1｜台股｜2026-11-16 18:32</title>
+<title>多方選股 v1｜台股｜2026-11-23 18:35</title>
 <style>
 /* ── 全域 ── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -92,14 +92,14 @@ button.primary { background: #238636; border-color: #238636; }
 
 <!-- ── 頁頂：標題 + Tab 切換 ── -->
 <div class="page-top">
-  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17">2026-11-17</option><option value="2026-11-16" selected>2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
+  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-23" selected>2026-11-23</option><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17">2026-11-17</option><option value="2026-11-16">2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
   <div class="tab-btns">
     <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
     <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
   </div>
   <div class="kind-btns">
-    <button class="kind-btn active" data-kind="個股" onclick="switchKind('個股')">個股<b>2</b></button>
-    <button class="kind-btn" data-kind="ETF" onclick="switchKind('ETF')">ETF<b>0</b></button>
+    <button class="kind-btn active" data-kind="個股" onclick="switchKind('個股')">個股<b>1</b></button>
+    <button class="kind-btn" data-kind="ETF" onclick="switchKind('ETF')">ETF<b>1</b></button>
   </div>
   <span style="color:#8b949e;font-size:12px;">盤前開啟自動帶入 A/B 級個股並即時更新</span>
 </div>
@@ -121,7 +121,7 @@ button.primary { background: #238636; border-color: #238636; }
       <option value="15">15秒</option><option value="30">30秒</option>
     </select>
     <span style="color:#8b949e;font-size:12px;" id="lastUpdate"></span>
-    <span style="color:#8b949e;font-size:12px;">資料日 2026/11/16 ｜ 產出 2026-11-16 18:32 ｜ 掃描 2299/2362 檔</span>
+    <span style="color:#8b949e;font-size:12px;">資料日 2026/11/23 ｜ 產出 2026-11-23 18:35 ｜ 掃描 2302/2364 檔</span>
   </div>
   <div class="mon-stats">
     <span>監控: <strong id="stCount">0</strong></span>
@@ -142,9 +142,8 @@ button.primary { background: #238636; border-color: #238636; }
       <th data-k="chgPct">漲跌%</th>
       <th data-k="volK">量(張)</th>
       <th data-k="turnover">換手率</th>
-      <th data-k="vr">量比</th>
-      <th data-k="vwapGap">距VWAP</th>
-      <th data-k="dayHighGap">距日高</th>
+      <th data-k="ma17Gap">距MA17</th>
+      <th data-k="ma95Gap">距MA95</th>
       <th data-k="score">盤中分</th>
       <th data-k="grade">盤中評級</th>
       <th>訊號</th>
@@ -167,16 +166,16 @@ button.primary { background: #238636; border-color: #238636; }
     <strong style="color:#58a6ff">點名稱開玩股網技術分析</strong>
   </div>
   <div class="stat-bar" data-kind="個股">
-    <div class="stat"><div class="val">2</div>入選總數</div>
+    <div class="stat"><div class="val">1</div>入選總數</div>
     <div class="stat"><div class="val" style="color:#16a34a">0</div>A 級</div>
-    <div class="stat"><div class="val" style="color:#2563eb">1</div>B 級</div>
+    <div class="stat"><div class="val" style="color:#2563eb">0</div>B 級</div>
     <div class="stat"><div class="val" style="color:#d97706">0</div>C 級</div>
     <div class="stat"><div class="val" style="color:#6b7280">1</div>觀察</div>
   </div>
   <div class="stat-bar" data-kind="ETF">
-    <div class="stat"><div class="val">0</div>入選總數</div>
+    <div class="stat"><div class="val">1</div>入選總數</div>
     <div class="stat"><div class="val" style="color:#16a34a">0</div>A 級</div>
-    <div class="stat"><div class="val" style="color:#2563eb">0</div>B 級</div>
+    <div class="stat"><div class="val" style="color:#2563eb">1</div>B 級</div>
     <div class="stat"><div class="val" style="color:#d97706">0</div>C 級</div>
     <div class="stat"><div class="val" style="color:#6b7280">0</div>觀察</div>
   </div>
@@ -189,9 +188,8 @@ button.primary { background: #238636; border-color: #238636; }
   <table id="main-table">
   <thead><tr><th onclick="sortTable(this)">訊號類型<span class="arrow">⇅</span></th><th onclick="sortTable(this)">等級<span class="arrow">⇅</span></th><th onclick="sortTable(this)">總分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">核心分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">觸發分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險扣分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">代號<span class="arrow">⇅</span></th><th onclick="sortTable(this)">名稱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">市場<span class="arrow">⇅</span></th><th onclick="sortTable(this)">產業<span class="arrow">⇅</span></th><th onclick="sortTable(this)">資料日期<span class="arrow">⇅</span></th><th onclick="sortTable(this)">收盤價<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA95<span class="arrow">⇅</span></th><th onclick="sortTable(this)">距MA17%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置說明<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17-MA95距離%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">上穿距今(日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI區間<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DIF<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DEA<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MACD柱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">成交量(張)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">換手率%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比(5日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比狀態<span class="arrow">⇅</span></th><th onclick="sortTable(this)">訊號摘要<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險提醒<span class="arrow">⇅</span></th></tr></thead>
   <tbody id="tbody">
-<tr class="row-b" data-kind="個股"><td>低檔起漲</td><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>11</td><td>2</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>6884</td><td><a href="https://www.wantgoo.com/stock/6884/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 海柏特 技術分析">海柏特</a></td><td>上櫃</td><td>資訊服務業</td><td>2026/11/16</td><td>35.2</td><td>31.88</td><td>31.58</td><td>+10.41%</td><td>開始偏追高</td><td>+0.95%</td><td>-</td><td>317.0</td><td>超買</td><td>0.3177</td><td>0.1216</td><td>0.3923</td><td>307</td><td>1.67%</td><td>26.02</td><td>🔥極度放量</td><td>低檔起漲、多頭排列、MA17上彎、MA95走平上彎、CCI上穿0軸、CCI金叉、MACD金叉、收盤接近高點、量比強(26.02)</td><td>量能趨勢不佳、CCI過熱、成交量未達1000張</td></tr>
-<tr class="row-w" data-kind="個股"><td>低檔起漲</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>6</td><td>6</td><td>2</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>3054</td><td><a href="https://www.wantgoo.com/stock/3054/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 立萬利 技術分析">立萬利</a></td><td>上市</td><td>食品工業</td><td>2026/11/16</td><td>63.7</td><td>57.45</td><td>56.03</td><td>+10.88%</td><td>開始偏追高</td><td>+2.53%</td><td>-</td><td>242.4</td><td>超買</td><td>0.7606</td><td>0.153</td><td>1.2152</td><td>581</td><td>0.72%</td><td>3.59</td><td>🔥極度放量</td><td>低檔起漲、多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、收盤接近高點、量比強(3.59)</td><td>量能趨勢不佳、CCI過熱、成交量未達1000張</td></tr>
-<tr class="row-w" data-kind="ETF"><td colspan="30" style="text-align:center;color:#8b949e;padding:18px">今日無符合條件的ETF</td></tr>
+<tr class="row-w" data-kind="個股"><td>低檔起漲</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>10</td><td>8</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>7736</td><td><a href="https://www.wantgoo.com/stock/7736/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 虎山 技術分析">虎山</a></td><td>上市</td><td>汽車工業</td><td>2026/11/23</td><td>72.6</td><td>68.14</td><td>69.41</td><td>+6.55%</td><td>距MA17中性</td><td>-1.83%</td><td>-</td><td>151.2</td><td>超買</td><td>-0.1351</td><td>-0.345</td><td>0.4197</td><td>498</td><td>0.66%</td><td>14.46</td><td>🔥極度放量</td><td>低檔起漲、MA17上彎、MA95走平上彎、CCI上穿0軸、CCI金叉、MACD金叉、收盤接近高點、量比強(14.46)</td><td>未站穩多頭排列、量能趨勢不佳、成交量未達1000張</td></tr>
+<tr class="row-b" data-kind="ETF"><td>已上穿</td><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>11</td><td>9</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#f87171;">-1</span></td><td>00722B</td><td><a href="https://www.wantgoo.com/stock/00722B/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 群益投資級電信債 技術分析">群益投資級電信債</a></td><td>上櫃</td><td>ETF·債券</td><td>2026/11/23</td><td>33.84</td><td>33.79</td><td>33.76</td><td>+0.15%</td><td>貼近MA17甜蜜區</td><td>+0.09%</td><td>0</td><td>12.4</td><td>偏多</td><td>0.0898</td><td>0.1286</td><td>-0.0776</td><td>5206</td><td>-</td><td>1.73</td><td>↑量能增加</td><td>MA17上穿MA95(0日前)、多頭排列、MA17上彎、CCI上穿0軸、CCI金叉、MACD柱放大、收盤接近高點、量比增溫(1.73)</td><td>量能趨勢不佳</td></tr>
 
   </tbody>
   </table>
@@ -204,7 +202,7 @@ button.primary { background: #238636; border-color: #238636; }
 // ════════════════════════════════════════════════════
 //  嵌入盤後選股資料（由 Python 產生）
 // ════════════════════════════════════════════════════
-const SCREEN_DATA = [{"id": "6884", "name": "海柏特", "market": "otc", "kind": "個股", "grade": "B", "score": 11, "breakout": true, "close": 35.2, "volK": 307, "vr5": 26.02, "shares": 18383234}, {"id": "3054", "name": "立萬利", "market": "tse", "kind": "個股", "grade": "觀察", "score": 6, "breakout": true, "close": 63.7, "volK": 581, "vr5": 3.59, "shares": 80694444}];
+const SCREEN_DATA = [{"id": "7736", "name": "虎山", "market": "tse", "kind": "個股", "grade": "觀察", "score": 10, "breakout": true, "close": 72.6, "volK": 498, "vr5": 14.46, "ma17": 68.14, "ma95": 69.41, "s16": 1089.7, "s94": 6523.5, "shares": 75454545}, {"id": "00722B", "name": "群益投資級電信債", "market": "otc", "kind": "ETF", "grade": "B", "score": 11, "breakout": false, "close": 33.84, "volK": 5206, "vr5": 1.73, "ma17": 33.79, "ma95": 33.76, "s16": 540.83, "s94": 3172.2311423708757}];
 
 // 個股 / ETF 切換：選股結果與即時監控都只顯示目前類別
 let currentKind = '個股';
@@ -292,7 +290,9 @@ function buildWatchlist() {
   return SCREEN_DATA.filter(s => (s.kind || '個股') === currentKind)
     .filter(s => s.breakout || activeGrades.has(s.grade))
     .map(s => ({ id: s.id, name: s.name, market: s.market,
-                 screenGrade: s.grade, screenScore: s.score }));
+                 screenGrade: s.grade, screenScore: s.score,
+                 close: s.close, volK: s.volK, vr5: s.vr5,
+                 ma17: s.ma17, ma95: s.ma95, s16: s.s16, s94: s.s94 }));
 }
 
 function reloadWatchlist() {
@@ -473,7 +473,11 @@ async function fetchOne(id, preQ) {
     if (shares && shares > 0 && vol > 0) turnover = (vol * 1000 / shares) * 100;
 
     const { score, grade, signals } = scoreIntraday(chgPct, vr, vwapGap, dayHighGap);
-    lastData[id] = { price, chgPct, volK: vol, vr, turnover, vwapGap, dayHighGap, score, grade, signals, _stale: !!q._stale, _errMsg: q._stale ? '報價暫未更新' : '' };
+    const ma17Now = s.s16 != null ? (s.s16 + price) / 17 : s.ma17;
+    const ma95Now = s.s94 != null ? (s.s94 + price) / 95 : s.ma95;
+    const ma17Gap = ma17Now > 0 ? (price / ma17Now - 1) * 100 : null;
+    const ma95Gap = ma95Now > 0 ? (price / ma95Now - 1) * 100 : null;
+    lastData[id] = { price, chgPct, volK: vol, vr, turnover, vwapGap, dayHighGap, ma17Gap, ma95Gap, score, grade, signals, _stale: !!q._stale, _errMsg: q._stale ? '報價暫未更新' : '' };
     lastSuccessTime[id] = Date.now();
     if (q.n) s.name = q.n;
   } catch(e) {
@@ -482,11 +486,22 @@ async function fetchOne(id, preQ) {
     } else if (s.close > 0) {
       // 沒有即時報價時，顯示報表內的選股日資料並明確標示，不留空白
       lastData[id] = { price: s.close, volK: s.volK != null ? s.volK : null, vr: s.vr5 != null ? s.vr5 : null,
+                       ma17Gap: s.ma17 > 0 ? (s.close / s.ma17 - 1) * 100 : null,
+                       ma95Gap: s.ma95 > 0 ? (s.close / s.ma95 - 1) * 100 : null,
                        signals: '選股日收盤（非即時）', _stale: true, _errMsg: '選股日收盤（非即時）' };
     } else {
       lastData[id] = { _stale: true, _errMsg: e.message };
     }
   }
+}
+
+// 距均線 ±%：站上（正）紅、跌破（負）綠，離越遠顏色越深
+function maGapCell(v) {
+  if (v == null || !isFinite(v)) return '<td>—</td>';
+  const a = Math.abs(v);
+  const color = v >= 0 ? (a >= 5 ? '#ff4d4f' : '#f0883e') : (a >= 5 ? '#3fb950' : '#7ee787');
+  const weight = a >= 5 ? 'bold' : 'normal';
+  return '<td style="color:' + color + ';font-weight:' + weight + '">' + (v >= 0 ? '+' : '') + v.toFixed(2) + '%</td>';
 }
 
 function scoreIntraday(chgPct, vr, vwapGap, dayHighGap) {
@@ -572,9 +587,8 @@ function renderMon() {
       '<td class="' + chgCls + '">' + chgPct + '</td>' +
       '<td>' + volK + '</td>' +
       '<td>' + toHtml + '</td>' +
-      '<td>' + vr + '</td>' +
-      '<td class="' + (r.vwapGap >= 0 ? 'up' : 'down') + '">' + vwapGap + '</td>' +
-      '<td>' + dhGap + '</td>' +
+      maGapCell(r.ma17Gap) +
+      maGapCell(r.ma95Gap) +
       '<td><strong>' + scoreTxt + '</strong></td>' +
       '<td>' + gradeHtml + '</td>' +
       '<td class="small">' + signalTxt + '</td>' +
