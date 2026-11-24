@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8">
-<title>多方選股 v1｜台股｜2026-11-17 18:33</title>
+<title>多方選股 v1｜台股｜2026-11-24 18:28</title>
 <style>
 /* ── 全域 ── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -92,14 +92,14 @@ button.primary { background: #238636; border-color: #238636; }
 
 <!-- ── 頁頂：標題 + Tab 切換 ── -->
 <div class="page-top">
-  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-23">2026-11-23</option><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17" selected>2026-11-17</option><option value="2026-11-16">2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
+  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-24" selected>2026-11-24</option><option value="2026-11-23">2026-11-23</option><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17">2026-11-17</option><option value="2026-11-16">2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
   <div class="tab-btns">
     <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
     <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
   </div>
   <div class="kind-btns">
-    <button class="kind-btn active" data-kind="個股" onclick="switchKind('個股')">個股<b>3</b></button>
-    <button class="kind-btn" data-kind="ETF" onclick="switchKind('ETF')">ETF<b>0</b></button>
+    <button class="kind-btn active" data-kind="個股" onclick="switchKind('個股')">個股<b>2</b></button>
+    <button class="kind-btn" data-kind="ETF" onclick="switchKind('ETF')">ETF<b>1</b></button>
   </div>
   <span style="color:#8b949e;font-size:12px;">盤前開啟自動帶入 A/B 級個股並即時更新</span>
 </div>
@@ -121,7 +121,7 @@ button.primary { background: #238636; border-color: #238636; }
       <option value="15">15秒</option><option value="30">30秒</option>
     </select>
     <span style="color:#8b949e;font-size:12px;" id="lastUpdate"></span>
-    <span style="color:#8b949e;font-size:12px;">資料日 2026/11/17 ｜ 產出 2026-11-17 18:33 ｜ 掃描 2299/2362 檔</span>
+    <span style="color:#8b949e;font-size:12px;">資料日 2026/11/24 ｜ 產出 2026-11-24 18:28 ｜ 掃描 2302/2364 檔</span>
   </div>
   <div class="mon-stats">
     <span>監控: <strong id="stCount">0</strong></span>
@@ -166,16 +166,16 @@ button.primary { background: #238636; border-color: #238636; }
     <strong style="color:#58a6ff">點名稱開玩股網技術分析</strong>
   </div>
   <div class="stat-bar" data-kind="個股">
-    <div class="stat"><div class="val">3</div>入選總數</div>
+    <div class="stat"><div class="val">2</div>入選總數</div>
     <div class="stat"><div class="val" style="color:#16a34a">0</div>A 級</div>
     <div class="stat"><div class="val" style="color:#2563eb">0</div>B 級</div>
-    <div class="stat"><div class="val" style="color:#d97706">1</div>C 級</div>
+    <div class="stat"><div class="val" style="color:#d97706">0</div>C 級</div>
     <div class="stat"><div class="val" style="color:#6b7280">2</div>觀察</div>
   </div>
   <div class="stat-bar" data-kind="ETF">
-    <div class="stat"><div class="val">0</div>入選總數</div>
+    <div class="stat"><div class="val">1</div>入選總數</div>
     <div class="stat"><div class="val" style="color:#16a34a">0</div>A 級</div>
-    <div class="stat"><div class="val" style="color:#2563eb">0</div>B 級</div>
+    <div class="stat"><div class="val" style="color:#2563eb">1</div>B 級</div>
     <div class="stat"><div class="val" style="color:#d97706">0</div>C 級</div>
     <div class="stat"><div class="val" style="color:#6b7280">0</div>觀察</div>
   </div>
@@ -188,10 +188,9 @@ button.primary { background: #238636; border-color: #238636; }
   <table id="main-table">
   <thead><tr><th onclick="sortTable(this)">訊號類型<span class="arrow">⇅</span></th><th onclick="sortTable(this)">等級<span class="arrow">⇅</span></th><th onclick="sortTable(this)">總分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">核心分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">觸發分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險扣分<span class="arrow">⇅</span></th><th onclick="sortTable(this)">代號<span class="arrow">⇅</span></th><th onclick="sortTable(this)">名稱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">市場<span class="arrow">⇅</span></th><th onclick="sortTable(this)">產業<span class="arrow">⇅</span></th><th onclick="sortTable(this)">資料日期<span class="arrow">⇅</span></th><th onclick="sortTable(this)">收盤價<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA95<span class="arrow">⇅</span></th><th onclick="sortTable(this)">距MA17%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">位置說明<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MA17-MA95距離%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">上穿距今(日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI<span class="arrow">⇅</span></th><th onclick="sortTable(this)">CCI區間<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DIF<span class="arrow">⇅</span></th><th onclick="sortTable(this)">DEA<span class="arrow">⇅</span></th><th onclick="sortTable(this)">MACD柱<span class="arrow">⇅</span></th><th onclick="sortTable(this)">成交量(張)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">換手率%<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比(5日)<span class="arrow">⇅</span></th><th onclick="sortTable(this)">量比狀態<span class="arrow">⇅</span></th><th onclick="sortTable(this)">訊號摘要<span class="arrow">⇅</span></th><th onclick="sortTable(this)">風險提醒<span class="arrow">⇅</span></th></tr></thead>
   <tbody id="tbody">
-<tr class="row-w" data-kind="個股"><td>低檔起漲</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>7</td><td>7</td><td>2</td><td><span style="color:#fbbf24;">-1</span></td><td><span style="color:#f87171;">-1</span></td><td>8415</td><td><a href="https://www.wantgoo.com/stock/8415/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 大國鋼 技術分析">大國鋼</a></td><td>上櫃</td><td>鋼鐵工業</td><td>2026/11/17</td><td>41.35</td><td>37.13</td><td>36.61</td><td>+11.37%</td><td>開始偏追高</td><td>+1.42%</td><td>-</td><td>241.0</td><td>超買</td><td>0.7026</td><td>0.3608</td><td>0.6836</td><td>9067</td><td>0.90%</td><td>6.37</td><td>🔥極度放量</td><td>低檔起漲、多頭排列、MA17上彎、MA95走平上彎、MACD柱放大、5日均量大於20日均量、收盤接近高點、量比強(6.37)</td><td>CCI過熱</td></tr>
-<tr class="row-c" data-kind="個股"><td>已上穿</td><td><span style="background:#d97706;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">C</span></td><td>8</td><td>6</td><td>0</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>3379</td><td><a href="https://www.wantgoo.com/stock/3379/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 彬台 技術分析">彬台</a></td><td>上櫃</td><td>電機機械</td><td>2026/11/17</td><td>32.0</td><td>31.41</td><td>29.14</td><td>+1.88%</td><td>貼近MA17甜蜜區</td><td>+7.79%</td><td>4</td><td>54.2</td><td>偏多</td><td>1.6454</td><td>1.3797</td><td>0.5314</td><td>2052</td><td><span style="color:#fbbf24;">5.39%</span></td><td>0.63</td><td>↓縮量</td><td>MA17上穿MA95(4日前)、多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量</td><td>-</td></tr>
-<tr class="row-w" data-kind="個股"><td>已上穿</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>7</td><td>6</td><td>0</td><td><span style="color:#86efac;">+1</span></td><td><span style="color:#8b949e;">0</span></td><td>3570</td><td><a href="https://www.wantgoo.com/stock/3570/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 大塚 技術分析">大塚</a></td><td>上櫃</td><td>資訊服務業</td><td>2026/11/17</td><td>176.5</td><td>169.06</td><td>165.8</td><td>+4.40%</td><td>距MA17可接受</td><td>+1.97%</td><td>2</td><td>109.1</td><td>超買</td><td>5.0824</td><td>1.9184</td><td>6.3282</td><td>1117</td><td><span style="color:#fbbf24;">6.53%</span></td><td>1.48</td><td>→正常</td><td>MA17上穿MA95(2日前)、多頭排列、MA17上彎、MA95走平上彎、5日均量大於20日均量</td><td>-</td></tr>
-<tr class="row-w" data-kind="ETF"><td colspan="30" style="text-align:center;color:#8b949e;padding:18px">今日無符合條件的ETF</td></tr>
+<tr class="row-w" data-kind="個股"><td>低檔起漲</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>8</td><td>6</td><td>2</td><td><span style="color:#8b949e;">0</span></td><td><span style="color:#8b949e;">0</span></td><td>2474</td><td><a href="https://www.wantgoo.com/stock/2474/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 可成 技術分析">可成</a></td><td>上市</td><td>其他電子業</td><td>2026/11/24</td><td>206.0</td><td>192.21</td><td>197.74</td><td>+7.17%</td><td>距MA17中性</td><td>-2.80%</td><td>-</td><td>162.2</td><td>超買</td><td>0.406</td><td>-1.168</td><td>3.148</td><td>10632</td><td>2.12%</td><td>2.74</td><td>📈大量放大</td><td>低檔起漲、MA17上彎、MA95走平上彎、CCI金叉、MACD柱放大、5日均量大於20日均量、收盤接近高點、量比強(2.74)</td><td>未站穩多頭排列</td></tr>
+<tr class="row-w" data-kind="個股"><td>低檔起漲</td><td><span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;">觀察</span></td><td>7</td><td>9</td><td>2</td><td><span style="color:#f87171;">-2</span></td><td><span style="color:#f87171;">-2</span></td><td>2597</td><td><a href="https://www.wantgoo.com/stock/2597/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 潤弘 技術分析">潤弘</a></td><td>上市</td><td>建材營造業</td><td>2026/11/24</td><td>192.0</td><td>171.12</td><td>167.74</td><td>+12.20%</td><td>明顯追高</td><td>+2.02%</td><td>-</td><td>201.2</td><td>超買</td><td>3.7239</td><td>1.791</td><td>3.8657</td><td>1998</td><td>0.64%</td><td>2.61</td><td>📈大量放大</td><td>低檔起漲、多頭排列、MA17上彎、MA95走平上彎、CCI金叉、MACD柱放大、5日均量大於20日均量、收盤接近高點、量比強(2.61)</td><td>爆量但位置過熱、CCI過熱</td></tr>
+<tr class="row-b" data-kind="ETF"><td>已上穿</td><td><span style="background:#2563eb;color:#fff;padding:2px 10px;border-radius:12px;font-weight:bold;">B</span></td><td>13</td><td>10</td><td>1</td><td><span style="color:#4ade80;font-weight:bold;">+2</span></td><td><span style="color:#8b949e;">0</span></td><td>00722B</td><td><a href="https://www.wantgoo.com/stock/00722B/technical-chart" target="_blank" style="color:#58a6ff;text-decoration:none;font-weight:bold;" title="玩股網 群益投資級電信債 技術分析">群益投資級電信債</a></td><td>上櫃</td><td>ETF·債券</td><td>2026/11/24</td><td>34.0</td><td>33.81</td><td>33.75</td><td>+0.56%</td><td>貼近MA17甜蜜區</td><td>+0.18%</td><td>1</td><td>47.6</td><td>偏多</td><td>0.106</td><td>0.1241</td><td>-0.0362</td><td>2547</td><td>-</td><td>0.67</td><td>↓縮量</td><td>MA17上穿MA95(1日前)、多頭排列、MA17上彎、CCI上穿0軸、CCI金叉、MACD柱放大、5日均量大於20日均量、收盤接近高點</td><td>-</td></tr>
 
   </tbody>
   </table>
@@ -204,7 +203,7 @@ button.primary { background: #238636; border-color: #238636; }
 // ════════════════════════════════════════════════════
 //  嵌入盤後選股資料（由 Python 產生）
 // ════════════════════════════════════════════════════
-const SCREEN_DATA = [{"id": "8415", "name": "大國鋼", "market": "otc", "kind": "個股", "grade": "觀察", "score": 7, "breakout": true, "close": 41.35, "volK": 9067, "vr5": 6.37, "ma17": 37.13, "ma95": 36.61, "s16": 594.3000000000001, "s94": 3444.49999996758, "shares": 1007444444}, {"id": "3379", "name": "彬台", "market": "otc", "kind": "個股", "grade": "C", "score": 8, "breakout": false, "close": 32.0, "volK": 2052, "vr5": 0.63, "ma17": 31.41, "ma95": 29.14, "s16": 509.40000000000003, "s94": 2737.536525857965, "shares": 38070501}, {"id": "3570", "name": "大塚", "market": "otc", "kind": "個股", "grade": "觀察", "score": 7, "breakout": false, "close": 176.5, "volK": 1117, "vr5": 1.48, "ma17": 169.06, "ma95": 165.8, "s16": 2709.5, "s94": 15585.800003051758, "shares": 17105666}];
+const SCREEN_DATA = [{"id": "2474", "name": "可成", "market": "tse", "kind": "個股", "grade": "觀察", "score": 8, "breakout": true, "close": 206.0, "volK": 10632, "vr5": 2.74, "ma17": 192.21, "ma95": 197.74, "s16": 3074.0, "s94": 18589.5, "shares": 501509434}, {"id": "2597", "name": "潤弘", "market": "tse", "kind": "個股", "grade": "觀察", "score": 7, "breakout": true, "close": 192.0, "volK": 1998, "vr5": 2.61, "ma17": 171.12, "ma95": 167.74, "s16": 2740.5, "s94": 15768.0, "shares": 312187500}, {"id": "00722B", "name": "群益投資級電信債", "market": "otc", "kind": "ETF", "grade": "B", "score": 13, "breakout": false, "close": 34.0, "volK": 2547, "vr5": 0.67, "ma17": 33.81, "ma95": 33.75, "s16": 541.4200000000001, "s94": 3170.933453803734}];
 
 // 個股 / ETF 切換：選股結果與即時監控都只顯示目前類別
 let currentKind = '個股';
