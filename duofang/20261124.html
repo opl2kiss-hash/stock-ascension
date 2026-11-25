@@ -92,7 +92,7 @@ button.primary { background: #238636; border-color: #238636; }
 
 <!-- ── 頁頂：標題 + Tab 切換 ── -->
 <div class="page-top">
-  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-24" selected>2026-11-24</option><option value="2026-11-23">2026-11-23</option><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17">2026-11-17</option><option value="2026-11-16">2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
+  <h1>📊 多方選股 v1 + 即時監控</h1><!--DAYPICK--><label class="day-pick" style="font-size:13px;color:#8b949e;white-space:nowrap">📅 歷史日期 <select style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:13px" onchange="goDay(this.value)"><option value="2026-11-25">2026-11-25</option><option value="2026-11-24" selected>2026-11-24</option><option value="2026-11-23">2026-11-23</option><option value="2026-11-20">2026-11-20</option><option value="2026-11-19">2026-11-19</option><option value="2026-11-18">2026-11-18</option><option value="2026-11-17">2026-11-17</option><option value="2026-11-16">2026-11-16</option><option value="2026-11-13">2026-11-13</option><option value="2026-11-12">2026-11-12</option><option value="2026-11-11">2026-11-11</option><option value="2026-11-10">2026-11-10</option><option value="2026-11-09">2026-11-09</option></select></label><script>function goDay(d){if(!d)return;var n=location.pathname.split("/").pop();location.href=(/^\d{8}\.html$/.test(n)?d.replace(/-/g,""):d)+".html"}(function(){if(location.protocol==="file:"||location.hostname==="127.0.0.1")return;fetch("reports.json").then(function(r){return r.ok?r.json():null}).then(function(a){if(!a)return;var ok={};a.forEach(function(x){ok[String(x).replace(/-/g,"")]=1});document.querySelectorAll(".day-pick option").forEach(function(o){if(!ok[o.value.replace(/-/g,"")]&&!o.selected)o.remove()})}).catch(function(){})})()</script><!--/DAYPICK-->
   <div class="tab-btns">
     <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">📈 即時監控</button>
     <button class="tab-btn" data-tab="screen"  onclick="switchTab('screen')">📋 選股結果</button>
@@ -430,12 +430,30 @@ async function fetchFinMindHist(id) {
   }
 }
 
+// 報告資料日（MM/DD），標示「顯示哪一天的收盤」用
+const DATA_DAY = (() => { const m = /資料日\s*(\d{4})\D?(\d{2})\D?(\d{2})/.exec(document.body.textContent); return m ? m[2] + '/' + m[3] : '選股日'; })();
+// 開盤前（含 08:30 起試撮）：今天的報價但時間早於 09:00，價格都不是成交價
+function isPreopen(q) {
+  const t = new Date(Date.now() + 8 * 3600e3), ymd = t.toISOString().slice(0, 10).replace(/-/g, '');
+  if (!q || q.d !== ymd) return false;
+  return t.getUTCHours() < 9 || (!!q.t && q.t < '09:00:00');
+}
+
 async function fetchOne(id, preQ) {
   const s = watchlist.find(x => x.id === id);
   if (!s) return;
   try {
     let q = preQ || null;
     if (!q) throw new Error('即時報價暫不可用');
+    if (isPreopen(q) || (q.z === '-' && !(parseFloat(q.pz) > 0) && !(lastData[id] && lastData[id].price != null && !lastData[id]._wait))) {
+      const w = new Date(Date.now() + 8 * 3600e3).getUTCHours() < 9 ? '尚未開盤' : '尚無成交';
+      delete lastSuccessTime[id];
+      lastData[id] = { price: s.close > 0 ? s.close : null, volK: s.volK != null ? s.volK : null,
+                       ma17Gap: s.ma17 > 0 && s.close > 0 ? (s.close / s.ma17 - 1) * 100 : null,
+                       ma95Gap: s.ma95 > 0 && s.close > 0 ? (s.close / s.ma95 - 1) * 100 : null,
+                       signals: w + '，顯示 ' + DATA_DAY + ' 收盤', _stale: true, _wait: w, _errMsg: w };
+      return;
+    }
 
     // q.z = 成交價（盤中），可能為 "-" 表示尚未成交；q.pz = 昨收
     const price = parseFloat(q.z) > 0 ? parseFloat(q.z)
@@ -482,7 +500,7 @@ async function fetchOne(id, preQ) {
     lastSuccessTime[id] = Date.now();
     if (q.n) s.name = q.n;
   } catch(e) {
-    if (lastData[id] && lastData[id].price != null) {
+    if (lastData[id] && lastData[id].price != null && !lastData[id]._wait) {
       lastData[id] = { ...lastData[id], _stale: true, _errMsg: e.message };
     } else if (s.close > 0) {
       // 沒有即時報價時，顯示報表內的選股日資料並明確標示，不留空白
@@ -573,6 +591,8 @@ function renderMon() {
       } else {
         freshHtml = '<span style="color:#3fb950;font-size:10px;margin-left:3px">' + new Date(lastOk).toLocaleTimeString('zh-TW') + '</span>';
       }
+    } else if (r._wait) {
+      freshHtml = '<span style="color:#8b949e;font-size:10px;margin-left:4px">' + r._wait + '</span>';
     } else if (r._stale) {
       freshHtml = '<span style="color:#f85149;font-size:11px">❌' + (r._errMsg||'無資料') + '</span>';
     }
@@ -580,7 +600,7 @@ function renderMon() {
 
     return '<tr style="' + rowStyle + '">' +
       '<td class="lft">' + r.id + '</td>' +
-      '<td class="name-cell" onclick="openChart(' + r.id + ')">' + r.name + freshHtml + '</td>' +
+      '<td class="name-cell" onclick="openChart(&quot;' + r.id + '&quot;)">' + r.name + freshHtml + '</td>' +
       '<td>' + sgHtml + '</td>' +
       '<td>' + (r.screenScore || '—') + '</td>' +
       '<td>' + mktTag + '</td>' +
@@ -625,6 +645,11 @@ async function refreshAll() {
   }
   const src = lastSources || {};
   const names = [src.mis ? 'MIS ' + src.mis : '', src.yahoo ? 'Yahoo ' + src.yahoo : '', src.cache ? '暫存 ' + src.cache : ''].filter(Boolean).join('、');
+  const waits = watchlist.filter(s => (lastData[s.id] || {})._wait === '尚未開盤').length;
+  if (!lastQuoteErr && waits && waits === watchlist.length) {
+    document.getElementById('lastUpdate').textContent = '尚未開盤，顯示 ' + DATA_DAY + ' 收盤（09:00 開盤後自動更新）｜' + new Date().toLocaleTimeString('zh-TW') + ' 已檢查';
+    return;
+  }
   document.getElementById('lastUpdate').textContent = lastQuoteErr ||
     ('報價 ' + new Date().toLocaleTimeString('zh-TW') + (names ? '（' + names + ' 檔）' : ''));
 }
@@ -657,5 +682,23 @@ function toast(msg, isErr) {
 switchKind('個股', false);
 switchTab('monitor');
 </script>
+
+<!--SPARK--><script>(function(){var D={"00722B":[[74,72,64,65,54,54,59,60,52,49,49,46,39,40,42,48,58,66,61,59,64,46,19,18,16,12,9,0,3,5,15,26,23,38,52,52,47,48,53,55,50,55,55,49,47,56,87,83,80,86,67,78,56,55,51,52,59,57,66,72],[70,69,68,66,65,63,62,62,61,59,59,59,58,56,55,55,54,54,53,53,53,52,50,48,45,43,41,38,35,33,32,31,29,28,27,27,26,25,26,28,30,32,34,37,40,43,48,52,55,58,60,62,62,62,62,62,63,63,64,65],[100,100,99,98,98,97,97,96,95,95,94,94,93,92,92,91,91,90,90,89,89,89,88,87,86,85,84,84,83,82,81,80,79,79,78,77,77,76,75,75,74,74,73,72,72,71,71,70,70,69,69,68,67,67,66,65,64,63,63,62]],"2474":[[77,80,77,83,100,92,77,87,83,72,75,68,68,73,67,78,83,87,92,88,85,77,73,77,80,78,78,75,52,40,37,35,43,38,42,35,37,40,43,48,52,43,32,33,13,10,10,0,5,13,23,13,38,48,50,50,47,32,32,75],[53,59,64,68,73,75,75,76,77,77,77,77,77,78,78,78,79,79,80,81,81,80,78,78,78,78,78,78,77,75,73,71,69,67,64,61,58,55,53,52,50,48,45,43,39,37,35,33,31,29,28,27,27,27,28,28,28,27,26,29],[48,49,49,50,51,51,51,51,51,51,50,50,49,49,49,49,50,50,50,51,51,51,52,52,53,54,55,56,57,58,58,58,58,59,59,58,56,54,53,52,52,51,51,51,51,50,50,49,49,48,48,47,47,47,47,47,47,47,47,47]],"2597":[[36,36,38,34,33,31,25,28,34,34,47,38,28,22,30,27,38,39,34,27,27,23,22,25,23,17,11,14,17,12,12,9,12,11,16,12,19,28,31,53,47,39,33,27,23,20,14,0,0,12,14,28,50,53,44,50,55,45,55,100],[22,24,25,27,27,28,28,28,29,29,31,32,32,32,32,32,33,33,33,32,32,31,31,31,30,29,28,26,25,24,23,22,21,20,18,17,17,17,17,19,20,21,22,23,24,24,24,23,23,23,23,24,26,28,29,30,30,30,31,35],[4,5,6,7,8,8,9,10,11,11,12,13,14,15,15,16,17,18,19,19,20,20,21,21,22,22,23,23,23,24,24,24,25,25,26,26,26,26,26,26,26,26,25,25,24,24,23,23,22,22,22,21,22,22,22,23,23,23,23,24]]},NS="http://www.w3.org/2000/svg",bg=(getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g)||[0,0,0]).map(Number),light=(bg.length<4||bg[3]>0)&&bg[0]+bg[1]+bg[2]>400;
+function svg(g){var s=document.createElementNS(NS,"svg"),W=104,H=30,n=g[0].length-1;
+s.setAttribute("width",W);s.setAttribute("height",H);s.setAttribute("viewBox","0 0 "+W+" "+H);s.setAttribute("class","mini-k");s.setAttribute("role","img");
+s.setAttribute("aria-label","近60日走勢");var t=document.createElementNS(NS,"title");t.textContent="近60日：股價（"+(light?"黑":"白")+"）、MA17（橘）、MA95（藍）";s.appendChild(t);
+[[2,"#4b8ff0"],[1,"#f0a020"],[0,light?"#1d2733":"#e5edf8"]].forEach(function(p){var l=document.createElementNS(NS,"polyline"),a=[];
+g[p[0]].forEach(function(v,j){if(v!==null)a.push((1+j/n*(W-2)).toFixed(1)+","+(H-2-v/100*(H-4)).toFixed(1))});
+l.setAttribute("points",a.join(" "));l.setAttribute("fill","none");l.setAttribute("stroke",p[1]);l.setAttribute("stroke-width","1.4");s.appendChild(l)});return s}
+function code(e){var m=/wantgoo\.com\/stock\/(?:etf\/)?([0-9A-Za-z]+)/.exec(e.getAttribute("href")||"")||/openChart\(['"]?([0-9A-Za-z]+)/.exec(e.getAttribute("onclick")||"");return m?m[1].toUpperCase():null}
+function add(){document.querySelectorAll('a[href*="wantgoo.com/stock/"],td.name-cell[onclick]').forEach(function(e){
+var c=code(e),g=c&&D[c];if(!g)return;
+var card=e.classList.contains("card-link"),box=e.tagName==="TD"?e:card?(e.querySelector(".stock-name")||e):e.parentNode;
+if(box.querySelector(".mini-k"))return;
+if(box.tagName==="TD"){box.classList.add("mini-td");if(getComputedStyle(box).position==="static")box.style.position="relative"}else if(card)box.style.whiteSpace="nowrap";
+if(box===e||card)box.appendChild(svg(g));else e.after(svg(g))})}
+var st=document.createElement("style");st.textContent=".mini-k{display:inline-block;vertical-align:middle;margin-left:10px;background:"+(light?"transparent":"#0f1a2c")+";border-radius:4px;padding:1px;box-sizing:content-box}td.mini-td{padding-right:124px!important}td.mini-td>.mini-k{position:absolute;right:8px;top:50%;transform:translateY(-50%);margin:0}";document.head.appendChild(st);
+var q=0;function later(){if(!q){q=1;requestAnimationFrame(function(){q=0;add()})}}
+add();new MutationObserver(later).observe(document.body,{childList:true,subtree:true})})();</script><!--/SPARK-->
 </body>
 </html>
